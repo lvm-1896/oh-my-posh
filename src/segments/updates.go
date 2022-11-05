@@ -15,25 +15,29 @@ type Updates struct {
 
 	RebootIcon       string
 	UpdatesIcon      string
+	RebootRequired   string
 	UpdatesAvailable string
 }
 
 const (
-	RebootRequired   properties.Property = "reboot"
-	UpdatesAvailable properties.Property = "updates"
+	RebootIcon properties.Property = "reboot"
+	UpdateIcon properties.Property = "update"
+	// RebootRequired   properties.Property = "reboot"
+	// UpdatesAvailable properties.Property = "updates"
 
 	RebootIndicator string = "/var/run/reboot-required"
 	UpdateIndicator string = "/var/lib/update-notifier/updates-available"
 )
 
 func (e *Updates) Template() string {
-	return " {{ .RebootIcon }} {{ .UpdatesAvailable }} "
+	return "{{ .RebootRequired }}{{ .UpdatesAvailable }}"
 }
 
 func (e *Updates) Enabled() bool {
 	e.RebootIcon = ""
 	if _, err := os.Stat(RebootIndicator); err == nil {
-		e.RebootIcon = e.props.GetString(RebootRequired, "\u27F3") // xEAD2
+		e.RebootIcon = e.props.GetString(RebootIcon, "\u27F3") // xEAD2
+		e.RebootRequired = fmt.Sprintf(" %s", e.UpdatesIcon)
 	}
 	e.UpdatesIcon = ""
 	e.UpdatesAvailable = ""
@@ -51,8 +55,8 @@ func (e *Updates) Enabled() bool {
 			}
 		}
 		if count > 0 {
-			e.UpdatesIcon = e.props.GetString(UpdatesAvailable, "\uEB42")
-			e.UpdatesAvailable = fmt.Sprintf("%s%d", e.UpdatesIcon, count)
+			e.UpdatesIcon = e.props.GetString(UpdateIcon, "\uEB42")
+			e.UpdatesAvailable = fmt.Sprintf(" %s %d", e.UpdatesIcon, count)
 		}
 	}
 
