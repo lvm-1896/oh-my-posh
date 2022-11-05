@@ -192,6 +192,8 @@ const (
 	TIME SegmentType = "time"
 	// UI5 Tooling segment
 	UI5TOOLING SegmentType = "ui5tooling"
+	// UPDATES writes whether OS updates are available and a reboot is required
+	UPDATES SegmentType = "updates"
 	// WAKATIME writes tracked time spend in dev editors
 	WAKATIME SegmentType = "wakatime"
 	// WINREG queries the Windows registry.
@@ -325,6 +327,7 @@ func (segment *Segment) mapSegmentWithWriter(env environment.Environment) error 
 		TERRAFORM:     &segments.Terraform{},
 		TEXT:          &segments.Text{},
 		TIME:          &segments.Time{},
+		UPDATES:       &segments.Updates{},
 		UI5TOOLING:    &segments.UI5Tooling{},
 		WAKATIME:      &segments.Wakatime{},
 		WINREG:        &segments.WindowsRegistry{},
