@@ -15,7 +15,7 @@ var (
 	manual bool
 
 	initCmd = &cobra.Command{
-		Use:   "init [bash|zsh|fish|powershell|pwsh|cmd|nu] --config ~/.mytheme.omp.json",
+		Use:   "init [bash|zsh|fish|powershell|pwsh|cmd|nu|yash] --config ~/.mytheme.omp.json",
 		Short: "Initialize your shell and config",
 		Long: `Initialize your shell and config.
 
@@ -24,6 +24,7 @@ See the documentation to initialize your shell: https://ohmyposh.dev/docs/instal
 			"bash",
 			"zsh",
 			"fish",
+			"yash",
 			"powershell",
 			"pwsh",
 			"cmd",

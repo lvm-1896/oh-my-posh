@@ -8,5 +8,6 @@ const (
 	PWSH5 = "powershell"
 	CMD   = "cmd"
 	NU    = "nu"
+	YASH  = "yash"
 	PLAIN = "shell"
 )
