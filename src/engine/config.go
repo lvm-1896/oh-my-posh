@@ -119,9 +119,6 @@ func loadConfig(env environment.Environment) *Config {
 	defer env.Trace(time.Now(), "config.loadConfig")
 	var cfg Config
 	configFile := env.Flags().Config
-	if _, err := os.Stat(configFile); err != nil {
-		return defaultConfig()
-	}
 
 	cfg.origin = configFile
 	cfg.format = strings.TrimPrefix(filepath.Ext(configFile), ".")
@@ -139,7 +136,9 @@ func loadConfig(env environment.Environment) *Config {
 	})
 
 	err := config.LoadFiles(configFile)
-	cfg.exitWithError(err)
+	if err != nil {
+		return defaultConfig()
+	}
 
 	err = config.BindStruct("", &cfg)
 	cfg.exitWithError(err)
@@ -182,24 +181,28 @@ func (cfg *Config) Export(format string) string {
 	var result bytes.Buffer
 
 	if cfg.format == JSON {
-		data := config.Data()
-		data["$schema"] = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
 		jsonEncoder := json2.NewEncoder(&result)
 		jsonEncoder.SetEscapeHTML(false)
 		jsonEncoder.SetIndent("", "  ")
-		err := jsonEncoder.Encode(data)
+		err := jsonEncoder.Encode(cfg)
 		cfg.exitWithError(err)
-		return escapeGlyphs(result.String())
+		prefix := "{\n  \"$schema\": \"https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json\","
+		data := strings.Replace(result.String(), "{", prefix, 1)
+		return escapeGlyphs(data)
 	}
 
 	_, err := config.DumpTo(&result, cfg.format)
 	cfg.exitWithError(err)
-	if cfg.format == YAML {
+	switch cfg.format {
+	case YAML:
 		prefix := "# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json\n\n"
 		return prefix + result.String()
+	case TOML:
+		prefix := "#:schema https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json\n\n"
+		return prefix + escapeGlyphs(result.String())
+	default:
+		return result.String()
 	}
-	prefix := "#:schema https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json\n\n"
-	return prefix + escapeGlyphs(result.String())
 }
 
 func (cfg *Config) BackupAndMigrate(env environment.Environment) {

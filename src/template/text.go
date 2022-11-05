@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"oh-my-posh/environment"
+	"oh-my-posh/regex"
 	"strings"
 	"text/template"
 )
@@ -85,9 +86,13 @@ func (t *Text) cleanTemplate() {
 		variable = strings.TrimPrefix(variable, ".")
 		splitted := strings.Split(variable, ".")
 		if len(splitted) == 0 {
-			return false
+			return true
 		}
 		variable = splitted[0]
+		// check if alphanumeric
+		if !regex.MatchString(`^[a-zA-Z0-9]+$`, variable) {
+			return true
+		}
 		for _, b := range knownVariables {
 			if variable == b {
 				return true

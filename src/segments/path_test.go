@@ -294,7 +294,7 @@ func TestAgnosterPathStyles(t *testing.T) {
 		},
 		{
 			Style:               Letter,
-			Expected:            "C:",
+			Expected:            "C:\\",
 			HomePath:            homeDirWindows,
 			Pwd:                 "C:\\",
 			GOOS:                environment.WINDOWS,
@@ -563,7 +563,7 @@ func TestAgnosterPathStyles(t *testing.T) {
 		},
 		{
 			Style:               AgnosterShort,
-			Expected:            "C:",
+			Expected:            "C:/",
 			HomePath:            homeDir,
 			Pwd:                 "/mnt/c",
 			Pswd:                "C:",
@@ -594,7 +594,7 @@ func TestAgnosterPathStyles(t *testing.T) {
 		},
 		{
 			Style:               AgnosterShort,
-			Expected:            "C:",
+			Expected:            "C:\\",
 			HomePath:            homeDirWindows,
 			Pwd:                 "C:",
 			GOOS:                environment.WINDOWS,
@@ -743,7 +743,7 @@ func TestFullAndFolderPath(t *testing.T) {
 		{Style: Folder, FolderSeparatorIcon: "|", Pwd: "/a/b/c/d", Expected: "d"},
 
 		// for Windows paths
-		{Style: Folder, FolderSeparatorIcon: "\\", Pwd: "C:\\", Expected: "C:", PathSeparator: "\\", GOOS: environment.WINDOWS},
+		{Style: Folder, FolderSeparatorIcon: "\\", Pwd: "C:\\", Expected: "C:\\", PathSeparator: "\\", GOOS: environment.WINDOWS},
 		{Style: Folder, FolderSeparatorIcon: "\\", Pwd: homeDirWindows, Expected: "~", PathSeparator: "\\", GOOS: environment.WINDOWS},
 		{Style: Full, FolderSeparatorIcon: "\\", Pwd: homeDirWindows, Expected: "~", PathSeparator: "\\", GOOS: environment.WINDOWS},
 		{Style: Full, FolderSeparatorIcon: "\\", Pwd: homeDirWindows + "\\abc", Expected: "~\\abc", PathSeparator: "\\", GOOS: environment.WINDOWS},
@@ -1333,5 +1333,38 @@ func TestNormalizePath(t *testing.T) {
 		}
 		got := pt.normalize(tc.Input)
 		assert.Equal(t, tc.Expected, got)
+	}
+}
+
+func TestReplaceMappedLocations(t *testing.T) {
+	cases := []struct {
+		Case     string
+		Pwd      string
+		Expected string
+	}{
+		{Pwd: "/f/g/h", Expected: "/f/g/h"},
+		{Pwd: "/f/g/h/e", Expected: "^/e"},
+		{Pwd: "/a/b/c/d", Expected: "#"},
+		{Pwd: "/a/b/c/d/e", Expected: "#/e"},
+	}
+
+	for _, tc := range cases {
+		env := new(mock.MockedEnvironment)
+		env.On("PathSeparator").Return("/")
+		env.On("Pwd").Return(tc.Pwd)
+		env.On("Shell").Return(shell.FISH)
+		env.On("GOOS").Return(environment.DARWIN)
+		path := &Path{
+			env: env,
+			props: properties.Map{
+				MappedLocationsEnabled: false,
+				MappedLocations: map[string]string{
+					"/a/b/c/d": "#",
+					"/f/g/h/*": "^",
+				},
+			},
+		}
+		path.setPaths()
+		assert.Equal(t, tc.Expected, path.pwd)
 	}
 }

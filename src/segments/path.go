@@ -78,13 +78,14 @@ func (pt *Path) Enabled() bool {
 		return false
 	}
 	pt.setStyle()
+	pwd := pt.env.Pwd()
 	if pt.env.IsWsl() {
-		pt.Location, _ = pt.env.RunCommand("wslpath", "-m", pt.pwd)
+		pt.Location, _ = pt.env.RunCommand("wslpath", "-m", pwd)
 	} else {
-		pt.Location = pt.pwd
+		pt.Location = pwd
 	}
 	pt.StackCount = pt.env.StackCount()
-	pt.Writable = pt.env.DirIsWritable(pt.env.Pwd())
+	pt.Writable = pt.env.DirIsWritable(pwd)
 	return true
 }
 
@@ -127,6 +128,9 @@ func (pt *Path) Init(props properties.Properties, env environment.Environment) {
 func (pt *Path) setStyle() {
 	if len(pt.relative) == 0 {
 		pt.Path = pt.root
+		if strings.HasSuffix(pt.Path, ":") {
+			pt.Path += pt.env.PathSeparator()
+		}
 		return
 	}
 	switch style := pt.props.GetString(properties.Style, Agnoster); style {
@@ -411,6 +415,10 @@ func (pt *Path) replaceMappedLocations() (string, string) {
 
 	for _, key := range keys {
 		keyRoot, keyRelative := pt.parsePath(key)
+		matchSubFolders := strings.HasSuffix(keyRelative, "*")
+		if matchSubFolders && len(keyRelative) > 1 {
+			keyRelative = keyRelative[0 : len(keyRelative)-1] // remove trailing /* or \*
+		}
 		if keyRoot != rootN || !strings.HasPrefix(relativeN, keyRelative) {
 			continue
 		}
@@ -425,7 +433,7 @@ func (pt *Path) replaceMappedLocations() (string, string) {
 			return value, strings.Trim(relative, pathSeparator)
 		}
 		// match several prefix elements
-		if overflow[0:1] == pt.env.PathSeparator() {
+		if matchSubFolders || overflow[0:1] == pt.env.PathSeparator() {
 			return value, strings.Trim(overflow, pathSeparator)
 		}
 	}

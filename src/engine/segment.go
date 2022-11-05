@@ -200,6 +200,8 @@ const (
 	WINREG SegmentType = "winreg"
 	// WITHINGS queries the Withings API.
 	WITHINGS SegmentType = "withings"
+	// XMAKE write the xmake version if xmake.lua is present
+	XMAKE SegmentType = "xmake"
 	// YTM writes YouTube Music information and status
 	YTM SegmentType = "ytm"
 )
@@ -332,6 +334,7 @@ func (segment *Segment) mapSegmentWithWriter(env environment.Environment) error 
 		WAKATIME:      &segments.Wakatime{},
 		WINREG:        &segments.WindowsRegistry{},
 		WITHINGS:      &segments.Withings{},
+		XMAKE:         &segments.XMake{},
 		YTM:           &segments.Ytm{},
 	}
 	if segment.Properties == nil {
