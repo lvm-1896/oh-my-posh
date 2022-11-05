@@ -22,6 +22,7 @@ package battery
 
 type Info struct {
 	Percentage int
+	PowerNow   int
 	State      State
 }
 

@@ -95,6 +95,7 @@ func getByPath(path string) (*battery, error) {
 	b := &battery{}
 	var err error
 
+	b.PowerNow, _ = readFloat(path, "power_now")
 	if b.Current, err = readFloat(path, "energy_now"); err == nil {
 		if b.Full, err = readFloat(path, "energy_full"); err != nil {
 			return nil, errors.New("unable to parse energy_full")
