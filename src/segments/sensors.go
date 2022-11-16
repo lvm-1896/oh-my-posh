@@ -93,14 +93,16 @@ type Sensors struct {
 
 	FanIcon     string
 	TempIcon    string
+	CelsiusIcon string
 	FanSpeed    string
 	Temperature string
 	Level       int
 }
 
 const (
-	FanIcon     properties.Property = "fan"
-	TempIcon    properties.Property = "temp"
+	FanIcon     properties.Property = "fan_icon"
+	TempIcon    properties.Property = "temp_icon"
+	CelsiusIcon properties.Property = "celsius_icon"
 	FanSensors  properties.Property = "fans"
 	TempSensors properties.Property = "thermals"
 )
@@ -163,7 +165,7 @@ func getHWMonitorFiles() (map[string]string, error) {
 }
 
 func (e *Sensors) Template() string {
-	return "{{ .FanSpeed }}{{ .Temperature }}\uE339" // "°C"
+	return "{{ .FanSpeed }}{{ .Temperature }}" // "°C"
 }
 
 type Response struct {
@@ -197,6 +199,7 @@ func (e *Sensors) getResult() (*Response, error) {
 func (e *Sensors) Enabled() bool {
 	e.FanIcon = ""
 	e.TempIcon = ""
+	e.CelsiusIcon = ""
 	e.FanSpeed = ""
 	e.Level = 0
 
@@ -247,6 +250,7 @@ func (e *Sensors) Enabled() bool {
 	}
 	e.FanIcon = e.props.GetString(FanIcon, "")
 	e.TempIcon = e.props.GetString(TempIcon, "")
+	e.CelsiusIcon = e.props.GetString(CelsiusIcon, "")
 	if speed > 0 {
 		e.FanSpeed = fmt.Sprintf("%s %d ", e.FanIcon, speed)
 	}
@@ -259,9 +263,7 @@ func (e *Sensors) Enabled() bool {
 		level = len(icons) - 1
 	}
 	e.Level = level
-	e.Temperature = fmt.Sprintf("%c %.0f", icons[level], temp)
-	// e.SensorsAvailable = fmt.Sprintf(" %s %d", e.SensorsIcon, count)
-
+	e.Temperature = fmt.Sprintf("%c %.0f%s", icons[level], temp, e.CelsiusIcon)
 	// if e.props.GetBool(properties.AlwaysEnabled, false) {
 	//	return true
 	//}
