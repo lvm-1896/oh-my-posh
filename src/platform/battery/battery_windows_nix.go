@@ -16,6 +16,8 @@ type battery struct {
 	Full float64
 	// Current voltage (in V).
 	Voltage float64
+	// Current power drain (in mWh)
+	PowerNow float64
 }
 
 func mapMostLogicalState(currentState, newState State) State {
@@ -45,15 +47,18 @@ func Get() (*Info, error) {
 	parseBatteryInfo := func(batteries []*battery) *Info {
 		var info Info
 		var current, total float64
+		var powernow float64
 		var state State
 		for _, bt := range batteries {
 			current += bt.Current
 			total += bt.Full
+			powernow += bt.PowerNow
 			state = mapMostLogicalState(state, bt.State)
 		}
 		batteryPercentage := current / total * 100
 		info.Percentage = int(math.Min(100, batteryPercentage))
 		info.State = state
+		info.PowerNow = int(powernow)
 		return &info
 	}
 
