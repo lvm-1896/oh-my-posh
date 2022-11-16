@@ -7,6 +7,7 @@ import (
 	"io/ioutil" //nolint:staticcheck,nolintlint
 	"oh-my-posh/platform"
 	"oh-my-posh/properties"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -195,6 +196,11 @@ func (e *Sensors) getResult() (*Response, error) {
 }
 
 func (e *Sensors) Enabled() bool {
+	info, err := os.Stat(sysfs)
+	if err != nil || !info.IsDir() {
+		return false
+	}
+
 	e.FanIcon = ""
 	e.TempIcon = ""
 	e.CelsiusIcon = ""
