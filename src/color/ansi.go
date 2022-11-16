@@ -104,6 +104,34 @@ func (a *Ansi) Init(shellName string) {
 		a.reverse = "\\[\x1b[7m\\]%s\\[\x1b[27m\\]"
 		a.dimmed = "\\[\x1b[2m\\]%s\\[\x1b[22m\\]"
 		a.strikethrough = "\\[\x1b[9m\\]%s\\[\x1b[29m\\]"
+	case shell.YASH:
+		a.format = "\\[%s\\]"
+		a.linechange = "\\[\x1b[%d%s\\]"
+		a.right = "\\[\x1b[%dC\\]"
+		a.left = "\\[\x1b[%dD\\]"
+		a.creset = "\\[\x1b[0m\\]"
+		a.clearBelow = "\\[\x1b[0J\\]"
+		a.clearLine = "\\[\x1b[K\\]"
+		a.saveCursorPosition = "\\[\x1b7\\]"
+		a.restoreCursorPosition = "\\[\x1b8\\]"
+		a.title = "\\[\x1b]0;%s\007\\]"
+		a.colorSingle = "\\[\x1b[%sm\\]%s\\[\x1b[0m\\]"
+		a.colorFull = "\\[\x1b[%sm\x1b[%sm\\]%s\\[\x1b[0m\\]"
+		a.colorTransparent = "\\[\x1b[%s;49m\x1b[7m\\]%s\\[\x1b[0m\\]"
+		a.escapeLeft = "\\["
+		a.escapeRight = "\\]"
+		a.hyperlink = "\\[\x1b]8;;%s\x1b\\\\\\]%s\\[\x1b]8;;\x1b\\\\\\]"
+		a.hyperlinkRegex = `(?P<STR>\\\[\x1b\]8;;(.+)\x1b\\\\\\\](?P<TEXT>.+)\\\[\x1b\]8;;\x1b\\\\\\\])`
+		a.osc99 = "\\[\x1b]9;9;\"%s\"\x1b\\\\\\]"
+		a.osc7 = "\\[\x1b]7;\"file://%s/%s\"\x1b\\\\\\]"
+		a.bold = "\\[\x1b[1m\\]%s\\[\x1b[22m\\]"
+		a.italic = "\\[\x1b[3m\\]%s\\[\x1b[23m\\]"
+		a.underline = "\\[\x1b[4m\\]%s\\[\x1b[24m\\]"
+		a.overline = "\\[\x1b[53m\\]%s\\[\x1b[55m\\]"
+		a.blink = "\\[\x1b[5m\\]%s\\[\x1b[25m\\]"
+		a.reverse = "\\[\x1b[7m\\]%s\\[\x1b[27m\\]"
+		a.dimmed = "\\[\x1b[2m\\]%s\\[\x1b[22m\\]"
+		a.strikethrough = "\\[\x1b[9m\\]%s\\[\x1b[29m\\]"
 	default:
 		a.format = "%s"
 		a.linechange = "\x1b[%d%s"
@@ -324,7 +352,7 @@ func (a *Ansi) ClearAfter() string {
 func (a *Ansi) Title(title string) string {
 	// we have to do this to prevent bash/zsh from misidentifying escape sequences
 	switch a.shell {
-	case shell.BASH:
+	case shell.BASH, shell.YASH:
 		title = strings.NewReplacer("`", "\\`", `\`, `\\`).Replace(title)
 	case shell.ZSH:
 		title = strings.NewReplacer("`", "\\`", `%`, `%%`).Replace(title)

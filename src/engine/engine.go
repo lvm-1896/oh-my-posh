@@ -277,6 +277,10 @@ func (e *Engine) print() string {
 		e.write(e.Ansi.GetCursorForRightWrite(e.rpromptLength, 0))
 		e.write(e.rprompt)
 		e.write(e.Ansi.RestoreCursorPosition())
+	case shell.YASH:
+		if !e.canWriteRPrompt(true) {
+			break
+		}
 	case shell.BASH:
 		if !e.canWriteRPrompt(true) {
 			break
@@ -321,6 +325,8 @@ func (e *Engine) PrintTooltip(tip string) string {
 		Segments:  []*Segment{tooltip},
 	}
 	switch e.Env.Shell() {
+	case shell.YASH:
+		// FIXME:
 	case shell.ZSH, shell.CMD, shell.FISH:
 		block.Init(e.Env, e.Writer, e.Ansi)
 		if !block.Enabled() {
