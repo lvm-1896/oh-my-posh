@@ -9,11 +9,16 @@ import (
 	"strings"
 
 	// "os"
+	"encoding/json"
 	"path/filepath"
 	"strconv"
 )
 
 const sysfs = "/sys/class/hwmon"
+const (
+	// CacheKeyResponse key used when caching the response
+	CacheKeyHWMonitors string = "hwmons"
+)
 
 /*
 	_prompt_sensors() {
@@ -94,13 +99,14 @@ type Sensors struct {
 }
 
 const (
-	FanIcon    properties.Property = "fan"
-	TempIcon   properties.Property = "temp"
-	FanSensor  properties.Property = "fanpath"
-	TempSensor properties.Property = "temppath"
+	FanIcon     properties.Property = "fan"
+	TempIcon    properties.Property = "temp"
+	FanSensors  properties.Property = "fans"
+	TempSensors properties.Property = "thermals"
 )
 
 var ErrNotFound = fmt.Errorf("Not found")
+var NoHWMonitorsError = fmt.Errorf("Hardware Monitor not found")
 
 func readFloat(path, filename string) (float64, error) {
 	str, err := ioutil.ReadFile(filepath.Join(path, filename))
@@ -131,9 +137,61 @@ func readInt(path, filename string) (int64, error) {
 	}
 	return num, err
 }
+func getMonitorName(path string) (name string, err error) {
+	nameBytes, err := ioutil.ReadFile(filepath.Join(path, "name"))
+	return string(nameBytes[:len(nameBytes)-1]), err
+}
+
+func getHWMonitorFiles() (map[string]string, error) {
+	files, err := ioutil.ReadDir(sysfs)
+	if err != nil {
+		return nil, err
+	}
+	bNames := map[string]string{}
+	for _, file := range files {
+		fn := file.Name()
+		path := filepath.Join(sysfs, fn)
+		if name, err := getMonitorName(path); err == nil {
+			bNames[name] = path
+		}
+	}
+	if len(bNames) == 0 {
+		return nil, NoHWMonitorsError
+	}
+	// fmt.Println(bNames)
+	return bNames, nil
+}
 
 func (e *Sensors) Template() string {
-	return "{{ .FanSpeed }}{{ .Temperature }}°C"
+	return "{{ .FanSpeed }}{{ .Temperature }}\uE339" // "°C"
+}
+
+type Response struct {
+	HWMon map[string]string `json:"monitors"`
+}
+
+func (e *Sensors) getResult() (*Response, error) {
+	cacheTimeout := e.props.GetInt(properties.CacheTimeout, properties.DefaultCacheTimeout)
+	response := new(Response)
+	if cacheTimeout > 0 {
+		// check if data stored in cache
+		val, found := e.env.Cache().Get(CacheKeyHWMonitors)
+		// we got something from the cache
+		if found {
+			err := json.Unmarshal([]byte(val), response)
+			if err != nil {
+				return nil, err
+			}
+			return response, nil
+		}
+	}
+	response.HWMon, _ = getHWMonitorFiles()
+	body, _ := json.Marshal(response)
+	if cacheTimeout > 0 {
+		// persist new forecasts in cache
+		e.env.Cache().Set(CacheKeyHWMonitors, string(body), cacheTimeout)
+	}
+	return response, nil
 }
 
 func (e *Sensors) Enabled() bool {
@@ -142,21 +200,49 @@ func (e *Sensors) Enabled() bool {
 	e.FanSpeed = ""
 	e.Level = 0
 
-	var speed int64 = 0
-	fs := e.props.GetString(FanSensor, "")
-	fs_spec := strings.Split(fs, ":")
-	if len(fs_spec) == 2 {
-		speed, _ = readInt("/sys/class/hwmon/hwmon"+fs_spec[0], fs_spec[1])
+	var monitors = map[string]string{}
+	q, err := e.getResult()
+	if err == nil {
+		if len(q.HWMon) > 0 {
+			monitors = q.HWMon
+		}
 	}
-	ts := e.props.GetString(TempSensor, "")
-	ts_spec := strings.Split(ts, ":")
+	if len(monitors) == 0 {
+		monitors, _ = getHWMonitorFiles()
+	}
+
+	var speed int64 = 0
+	for _, fan := range e.props.GetStringArray(FanSensors, []string{}) {
+		fs_spec := strings.Split(fan, ":")
+		if len(fs_spec) == 2 {
+			if path, found := monitors[fs_spec[0]]; found {
+				// fmt.Println(path)
+				if s, err := readInt(path, fs_spec[1]); err == nil {
+					speed = speed + s
+				}
+			}
+		}
+	}
+	// fmt.Println(speed)
 	temp := 0.0
-	crit := 0.0
-	if len(ts_spec) >= 2 {
-		temp, _ = readFloat("/sys/class/hwmon/hwmon"+ts_spec[0], ts_spec[1])
-		crit = 100
-		if len(ts_spec) == 3 {
-			crit, _ = readFloat("/sys/class/hwmon/hwmon"+ts_spec[0], ts_spec[2])
+	crit := 100.0
+	for _, thermal := range e.props.GetStringArray(TempSensors, []string{}) {
+		ts_spec := strings.Split(thermal, ":")
+		if len(ts_spec) >= 2 {
+			if path, found := monitors[ts_spec[0]]; found {
+				if t, err := readFloat(path, ts_spec[1]); err == nil {
+					if t > temp {
+						temp = t
+					}
+					if len(ts_spec) == 3 {
+						if c, err := readFloat(path, ts_spec[2]); err == nil {
+							if c < crit {
+								crit = c
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	e.FanIcon = e.props.GetString(FanIcon, "")
