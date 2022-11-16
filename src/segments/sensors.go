@@ -2,16 +2,14 @@ package segments
 
 import (
 	// "bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil" //nolint:staticcheck,nolintlint
-	"oh-my-posh/environment"
+	"oh-my-posh/platform"
 	"oh-my-posh/properties"
-	"strings"
-
-	// "os"
-	"encoding/json"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 const sysfs = "/sys/class/hwmon"
@@ -89,7 +87,7 @@ type sensor struct {
 
 type Sensors struct {
 	props properties.Properties
-	env   environment.Environment
+	env   platform.Environment
 
 	FanIcon     string
 	TempIcon    string
@@ -270,7 +268,7 @@ func (e *Sensors) Enabled() bool {
 	return true
 }
 
-func (e *Sensors) Init(props properties.Properties, env environment.Environment) {
+func (e *Sensors) Init(props properties.Properties, env platform.Environment) {
 	e.props = props
 	e.env = env
 }

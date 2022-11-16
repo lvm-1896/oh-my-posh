@@ -3,7 +3,7 @@ package segments
 import (
 	"bufio"
 	"fmt"
-	"oh-my-posh/environment"
+	"oh-my-posh/platform"
 	"oh-my-posh/properties"
 	"os"
 	"strconv"
@@ -11,7 +11,7 @@ import (
 
 type Updates struct {
 	props properties.Properties
-	env   environment.Environment
+	env   platform.Environment
 
 	RebootIcon       string
 	UpdatesIcon      string
@@ -66,7 +66,7 @@ func (e *Updates) Enabled() bool {
 	return true
 }
 
-func (e *Updates) Init(props properties.Properties, env environment.Environment) {
+func (e *Updates) Init(props properties.Properties, env platform.Environment) {
 	e.props = props
 	e.env = env
 }
