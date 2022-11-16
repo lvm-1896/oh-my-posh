@@ -170,6 +170,8 @@ const (
 	RUBY SegmentType = "ruby"
 	// RUST writes the cargo version information if cargo.toml is present
 	RUST SegmentType = "rust"
+	// SENSORS writes sensory informations
+	SENSORS SegmentType = "sensors"
 	// SESSION represents the user info segment
 	SESSION SegmentType = "session"
 	// SHELL writes which shell we're currently in
@@ -319,6 +321,7 @@ func (segment *Segment) mapSegmentWithWriter(env platform.Environment) error {
 		ROOT:          &segments.Root{},
 		RUBY:          &segments.Ruby{},
 		RUST:          &segments.Rust{},
+		SENSORS:       &segments.Sensors{},
 		SESSION:       &segments.Session{},
 		SHELL:         &segments.Shell{},
 		SPOTIFY:       &segments.Spotify{},
