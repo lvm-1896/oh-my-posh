@@ -70,6 +70,12 @@ func (env *Shell) Platform() string {
 		return platform
 	}
 	platform, _, _, _ = host.PlatformInformation()
+	if platform == "ubuntu" {
+		uname := env.FileContent("/proc/sys/kernel/osrelease")
+		if strings.Contains(uname, "raspi") {
+			platform = "raspbian"
+		}
+	}
 	if platform == "arch" {
 		// validate for Manjaro
 		lsbInfo := env.FileContent("/etc/lsb-release")
