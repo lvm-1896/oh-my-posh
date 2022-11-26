@@ -26,7 +26,8 @@ func renderTemplate(env *mock.MockedEnvironment, segmentTemplate string, context
 			Env: make(map[string]string),
 		})
 	}
-	env.On("Log", mock2.Anything, mock2.Anything, mock2.Anything)
+	env.On("Error", mock2.Anything, mock2.Anything)
+	env.On("Debug", mock2.Anything, mock2.Anything)
 	tmpl := &template.Text{
 		Template: segmentTemplate,
 		Context:  context,
@@ -1292,7 +1293,8 @@ func TestGetFolderSeparator(t *testing.T) {
 	for _, tc := range cases {
 		env := new(mock.MockedEnvironment)
 		env.On("PathSeparator").Return("/")
-		env.On("Log", mock2.Anything, mock2.Anything, mock2.Anything)
+		env.On("Error", mock2.Anything, mock2.Anything)
+		env.On("Debug", mock2.Anything, mock2.Anything)
 		path := &Path{
 			env: env,
 		}
@@ -1348,6 +1350,7 @@ func TestReplaceMappedLocations(t *testing.T) {
 		Pwd      string
 		Expected string
 	}{
+		{Pwd: "/c/l/k/f", Expected: "f"},
 		{Pwd: "/f/g/h", Expected: "/f/g/h"},
 		{Pwd: "/f/g/h/e", Expected: "^/e"},
 		{Pwd: "/a/b/c/d", Expected: "#"},
@@ -1367,6 +1370,7 @@ func TestReplaceMappedLocations(t *testing.T) {
 				MappedLocations: map[string]string{
 					"/a/b/c/d": "#",
 					"/f/g/h/*": "^",
+					"/c/l/k/*": "",
 				},
 			},
 		}

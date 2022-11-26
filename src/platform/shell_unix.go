@@ -51,7 +51,7 @@ func (env *Shell) TerminalWidth() (int, error) {
 	}
 	width, err := terminal.Width()
 	if err != nil {
-		env.Log(Error, "TerminalWidth", err.Error())
+		env.Error("TerminalWidth", err)
 	}
 	return int(width), err
 }
@@ -83,6 +83,7 @@ func (env *Shell) Platform() string {
 			platform = "manjaro"
 		}
 	}
+	env.Debug("Platform", platform)
 	return platform
 }
 
