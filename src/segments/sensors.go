@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil" //nolint:staticcheck,nolintlint
-	"oh-my-posh/platform"
-	"oh-my-posh/properties"
-	"os"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+
+	 "os"
 	"path/filepath"
 	"strconv"
 	"strings"

@@ -326,6 +326,7 @@ var Segments = map[SegmentType]func() SegmentWriter{
 	TIME:          func() SegmentWriter { return &segments.Time{} },
 	UI5TOOLING:    func() SegmentWriter { return &segments.UI5Tooling{} },
 	UNITY:         func() SegmentWriter { return &segments.Unity{} },
+	UPDATES:       func() SegmentWriter { return &segments.Updates{} },
 	UPGRADE:       func() SegmentWriter { return &segments.Upgrade{} },
 	VALA:          func() SegmentWriter { return &segments.Vala{} },
 	WAKATIME:      func() SegmentWriter { return &segments.Wakatime{} },

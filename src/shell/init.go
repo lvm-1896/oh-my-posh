@@ -234,10 +234,6 @@ func PrintInit(env platform.Environment) string {
 		executable = quotePosixStr(executable)
 		configFile = quotePosixStr(configFile)
 		script = bashInit
-	case YASH:
-		executable = quotePosixStr(executable)
-		configFile = quotePosixStr(configFile)
-		script = yashInit
 	case FISH:
 		executable = quoteFishStr(executable)
 		configFile = quoteFishStr(configFile)
@@ -258,6 +254,10 @@ func PrintInit(env platform.Environment) string {
 		script = elvishInit
 	case XONSH:
 		script = xonshInit
+	case YASH:
+		executable = quotePosixStr(executable)
+		configFile = quotePosixStr(configFile)
+		script = yashInit
 	default:
 		return fmt.Sprintf("echo \"No initialization script available for %s\"", shell)
 	}

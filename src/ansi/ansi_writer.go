@@ -123,7 +123,7 @@ func (w *Writer) Init(shellName string) {
 	w.shell = shellName
 	w.format = "%s"
 	switch w.shell {
-	case shell.BASH:
+	case shell.BASH, shell.YASH:
 		w.format = "\\[%s\\]"
 		w.linechange = "\\[\x1b[%d%s\\]"
 		w.left = "\\[\x1b[%dD\\]"

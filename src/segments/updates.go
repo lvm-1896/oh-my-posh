@@ -3,8 +3,8 @@ package segments
 import (
 	"bufio"
 	"fmt"
-	"oh-my-posh/platform"
-	"oh-my-posh/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 	"os"
 	"strconv"
 )
