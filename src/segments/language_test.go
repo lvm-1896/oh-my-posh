@@ -1,10 +1,11 @@
 package segments
 
 import (
-	"oh-my-posh/mock"
-	"oh-my-posh/platform"
-	"oh-my-posh/properties"
 	"testing"
+
+	"github.com/jandedobbeleer/oh-my-posh/src/mock"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -154,6 +155,31 @@ func TestLanguageEnabledOneExtensionFound(t *testing.T) {
 	assert.True(t, lang.Enabled())
 	assert.Equal(t, universion, lang.Full, "unicorn is available and uni files are found")
 	assert.Equal(t, "unicorn", lang.Executable, "unicorn was used")
+}
+
+func TestLanguageEnabledMismatch(t *testing.T) {
+	expectedVersion := "1.2.009"
+
+	args := &languageArgs{
+		commands: []*cmd{
+			{
+				executable: "unicorn",
+				args:       []string{"--version"},
+				regex:      "(?P<version>.*)",
+			},
+		},
+		extensions:        []string{uni, corn},
+		enabledExtensions: []string{uni},
+		enabledCommands:   []string{"unicorn"},
+		version:           universion,
+		matchesVersionFile: func() (string, bool) {
+			return expectedVersion, false
+		},
+	}
+	lang := bootStrapLanguageTest(args)
+	assert.True(t, lang.Enabled())
+	assert.Equal(t, expectedVersion, lang.Expected, "the expected unicorn version is 1.2.009")
+	assert.True(t, lang.Mismatch, "we require a different version of unicorn")
 }
 
 func TestLanguageDisabledInHome(t *testing.T) {

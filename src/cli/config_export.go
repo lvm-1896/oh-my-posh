@@ -2,10 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"oh-my-posh/engine"
-	"oh-my-posh/platform"
 	"path/filepath"
 	"strings"
+
+	"github.com/jandedobbeleer/oh-my-posh/src/engine"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 
 	"github.com/spf13/cobra"
 )
@@ -30,16 +31,10 @@ Exports the ~/myconfig.omp.json config file and prints the result to stdout.
 
 > oh-my-posh config export --config ~/myconfig.omp.json --format toml
 
-Exports the ~/myconfig.omp.json config file to toml and prints the result to stdout.
-
-> oh-my-posh config export --config ~/myconfig.omp.json --format toml --write
-
-Exports the ~/myconfig.omp.json config file to toml and writes the result to your config file.
-A backup of the current config can be found at ~/myconfig.omp.json.bak.`,
+Exports the ~/myconfig.omp.json config file to toml and prints the result to stdout.`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		env := &platform.Shell{
-			Version: cliVersion,
 			CmdFlags: &platform.Flags{
 				Config: config,
 			},

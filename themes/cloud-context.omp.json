@@ -27,7 +27,7 @@
           },
           "style": "powerline",
           "powerline_symbol": "",
-          "template": " <p:symbol-color>\uf65e</> {{ dateInZone .Format .CurrentDate \"UTC\" }} ",
+          "template": " <p:symbol-color>\uebaa</> {{ dateInZone .Format .CurrentDate \"UTC\" }} ",
           "type": "time"
         },
         {
@@ -35,7 +35,7 @@
           "foreground": "p:kubernetes-text",
           "style": "powerline",
           "powerline_symbol": "\ue0b4",
-          "template": "<p:symbol-color>\ufd31</> {{.Context}}{{if .Namespace}} \uf061 {{.Namespace}}{{end}}",
+          "template": "<p:symbol-color>\uf308</> {{.Context}}{{if .Namespace}} \uf061 {{.Namespace}}{{end}}",
           "type": "kubectl"
         },
         {
@@ -54,7 +54,7 @@
           },
           "style": "powerline",
           "powerline_symbol": "\ue0b4",
-          "template": " <p:symbol-color>\ufd03</> {{ .Name }}",
+          "template": " <p:symbol-color>\uebd8</> {{ .Name }}",
           "type": "az"
         },
         {
@@ -65,7 +65,7 @@
           },
           "style": "powerline",
           "powerline_symbol": "\ue0b4",
-          "template": " <p:symbol-color>\ufd03</> (PS) {{ .Name }}",
+          "template": " <p:symbol-color>\uebd8</> (PS) {{ .Name }}",
           "type": "az"
         },
         {
@@ -93,7 +93,7 @@
           },
           "style": "powerline",
           "powerline_symbol": "\ue0b4",
-          "template": " <p:symbol-color>\ufbab</> {{ .FormattedMs }}",
+          "template": " <p:symbol-color>\ueba2</> {{ .FormattedMs }}",
           "type": "executiontime"
         },
         {
@@ -104,8 +104,8 @@
           },
           "style": "powerline",
           "powerline_symbol": "\ue0b4",
-          "template": "{{ if eq .Code 0 }} \uf7d0 {{ end }}",
-          "type": "exit"
+          "template": "{{ if eq .Code 0 }} \uf004 {{ end }}",
+          "type": "status"
         },
         {
           "background": "p:error-background",
@@ -113,8 +113,8 @@
           "leading_diamond": " \ue0c5",
           "trailing_diamond": "\ue0c4",
           "style": "diamond",
-          "template": "{{ if ne .Code 0 }} \uf00d {{ .Code }}{{ if (ne .Meaning (toString .Code)) }} - {{ .Meaning }}{{else}}{{ end }} {{ end }}",
-          "type": "exit"
+          "template": "{{ if ne .Code 0 }} \uf00d {{ .Code }}{{ if (ne (reason .Code) (toString .Code)) }} - {{ reason .Code }}{{else}}{{ end }} {{ end }}",
+          "type": "status"
         }
       ],
       "type": "prompt"
@@ -155,7 +155,7 @@
           },
           "style": "powerline",
           "powerline_symbol": "\ue0b4",
-          "template": "{{ .HEAD }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if gt .StashCount 0 }} \uf692 {{ .StashCount }}{{ end }} ",
+          "template": "{{ .HEAD }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
           "type": "git"
         }
       ],

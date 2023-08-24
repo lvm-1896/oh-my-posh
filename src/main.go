@@ -1,11 +1,7 @@
 package main
 
-import "oh-my-posh/cli"
-
-var (
-	Version = "development"
-)
+import "github.com/jandedobbeleer/oh-my-posh/src/cli"
 
 func main() {
-	cli.Execute(Version)
+	cli.Execute()
 }

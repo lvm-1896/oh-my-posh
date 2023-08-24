@@ -1,4 +1,5 @@
 set --export POSH_THEME ::CONFIG::
+set --export POSH_SHELL_VERSION $FISH_VERSION
 set --global POWERLINE_COMMAND "oh-my-posh"
 set --global POSH_PID $fish_pid
 set --global CONDA_PROMPT_MODIFIER false
@@ -13,30 +14,44 @@ end
 
 function fish_prompt
     set --local omp_status_cache_temp $status
+    set --local omp_pipestatus_cache_temp $pipestatus
     # clear from cursor to end of screen as
     # commandline --function repaint does not do this
     # see https://github.com/fish-shell/fish-shell/issues/8418
     printf \e\[0J
     if test "$omp_transient" = "1"
-      ::OMP:: print transient --config $POSH_THEME --shell fish --error $omp_status_cache --execution-time $omp_duration --stack-count $omp_stack_count --shell-version $FISH_VERSION
+      ::OMP:: print transient --config $POSH_THEME --shell fish --status $omp_status_cache --pipestatus="$omp_pipestatus_cache" --execution-time $omp_duration --stack-count $omp_stack_count --shell-version $FISH_VERSION --no-status=$omp_no_exit_code
       return
     end
     set --global omp_status_cache $omp_status_cache_temp
+    set --global omp_pipestatus_cache $omp_pipestatus_cache_temp
     set --global omp_stack_count (count $dirstack)
     set --global omp_duration "$CMD_DURATION$cmd_duration"
+    set --global omp_no_exit_code false
     # check if variable set, < 3.2 case
     if set --query omp_lastcommand; and test "$omp_lastcommand" = ""
       set omp_duration 0
+      set omp_no_exit_code true
     end
     # works with fish >=3.2
     if set --query omp_last_status_generation; and test "$omp_last_status_generation" = "$status_generation"
       set omp_duration 0
+      set omp_no_exit_code true
+    else if test -z "$omp_last_status_generation"
+      # first execution - $status_generation is 0, $omp_last_status_generation is empty
+      set omp_no_exit_code true
     end
     if set --query status_generation
       set --global --export omp_last_status_generation $status_generation
     end
     set_poshcontext
-    ::OMP:: print primary --config $POSH_THEME --shell fish --error $omp_status_cache --execution-time $omp_duration --stack-count $omp_stack_count --shell-version $FISH_VERSION
+    # validate if the user cleared the screen
+    set --local omp_cleared false
+    set --local last_command (history search --max 1)
+    if test "$last_command" = "clear"
+      set omp_cleared true
+    end
+    ::OMP:: print primary --config $POSH_THEME --shell fish --status $omp_status_cache --pipestatus="$omp_pipestatus_cache" --execution-time $omp_duration --stack-count $omp_stack_count --shell-version $FISH_VERSION --cleared=$omp_cleared --no-status=$omp_no_exit_code
 end
 
 function fish_right_prompt
@@ -53,7 +68,7 @@ function fish_right_prompt
       return
     end
     set has_omp_tooltip false
-    ::OMP:: print right --config $POSH_THEME --shell fish --error $omp_status_cache --execution-time $omp_duration --stack-count $omp_stack_count --shell-version $FISH_VERSION
+    ::OMP:: print right --config $POSH_THEME --shell fish --status $omp_status_cache --execution-time $omp_duration --stack-count $omp_stack_count --shell-version $FISH_VERSION
 end
 
 function postexec_omp --on-event fish_postexec
@@ -65,6 +80,12 @@ end
 # fix tooltip not resetting on SIGINT (ctrl+c)
 function sigint_omp --on-signal INT
     commandline --function repaint
+end
+
+function preexec_omp --on-event fish_preexec
+  if "::FTCS_MARKS::" = "true"
+    echo -ne "\e]133;C\a"
+  end
 end
 
 # perform cleanup so a new initialization in current session works
@@ -79,12 +100,13 @@ end
 
 function _render_tooltip
   commandline --function expand-abbr
-  set omp_tooltip_command (commandline --current-buffer | string split --allow-empty -f1 ' ' | string collect)
+  commandline --insert " "
+  # get the first word of command line as tip
+  set omp_tooltip_command (commandline --current-buffer | string trim -l | string split --allow-empty -f1 ' ' | string collect)
   if not test -n "$omp_tooltip_command"
     return
   end
-  set omp_tooltip_prompt (::OMP:: print tooltip --config $POSH_THEME --shell fish --error $omp_status_cache --shell-version $FISH_VERSION --command $omp_tooltip_command)
-  commandline --insert " "
+  set omp_tooltip_prompt (::OMP:: print tooltip --config $POSH_THEME --shell fish --status $omp_status_cache --shell-version $FISH_VERSION --command $omp_tooltip_command)
   if not test -n "$omp_tooltip_prompt"
     if test "$has_omp_tooltip" = "true"
       commandline --function repaint
@@ -95,7 +117,8 @@ function _render_tooltip
 end
 
 if test "::TOOLTIPS::" = "true"
-  bind \x20 _render_tooltip
+  bind \x20 _render_tooltip -M default
+  bind \x20 _render_tooltip -M insert
 end
 
 # transient prompt
@@ -111,7 +134,9 @@ function _render_transient
 end
 
 if test "::TRANSIENT::" = "true"
-  bind \r _render_transient
+  bind \r _render_transient -M default
+  bind \r _render_transient -M insert
+  bind \r _render_transient -M visual
 end
 
 # legacy functions
@@ -120,4 +145,8 @@ function enable_poshtooltips
 end
 function enable_poshtransientprompt
   return
+end
+
+if test "::UPGRADE::" = "true"
+  echo "::UPGRADENOTICE::"
 end

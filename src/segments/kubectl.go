@@ -1,15 +1,19 @@
 package segments
 
 import (
-	"oh-my-posh/platform"
-	"oh-my-posh/properties"
 	"path/filepath"
+
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 
 	"gopkg.in/yaml.v3"
 )
 
 // Whether to use kubectl or read kubeconfig ourselves
-const ParseKubeConfig properties.Property = "parse_kubeconfig"
+const (
+	ParseKubeConfig properties.Property = "parse_kubeconfig"
+	ContextAliases  properties.Property = "context_aliases"
+)
 
 type Kubectl struct {
 	props properties.Properties
@@ -87,9 +91,13 @@ func (k *Kubectl) doParseKubeConfig() bool {
 		if !exists {
 			continue
 		}
+
 		if context != nil {
 			k.KubeContext = *context
 		}
+
+		k.SetContextAlias()
+
 		return true
 	}
 
@@ -122,6 +130,7 @@ func (k *Kubectl) doCallKubectl() bool {
 		return false
 	}
 	k.Context = config.CurrentContext
+	k.SetContextAlias()
 	if len(config.Contexts) > 0 {
 		k.KubeContext = *config.Contexts[0].Context
 	}
@@ -135,4 +144,11 @@ func (k *Kubectl) setError(message string) {
 	k.Namespace = message
 	k.User = message
 	k.Cluster = message
+}
+
+func (k *Kubectl) SetContextAlias() {
+	aliases := k.props.GetKeyValueMap(ContextAliases, map[string]string{})
+	if alias, exists := aliases[k.Context]; exists {
+		k.Context = alias
+	}
 }

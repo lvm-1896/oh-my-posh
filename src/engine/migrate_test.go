@@ -1,12 +1,15 @@
 package engine
 
 import (
-	"oh-my-posh/mock"
-	"oh-my-posh/platform"
-	"oh-my-posh/properties"
 	"testing"
 
+	"github.com/jandedobbeleer/oh-my-posh/src/mock"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/segments"
+
 	"github.com/stretchr/testify/assert"
+	mock2 "github.com/stretchr/testify/mock"
 )
 
 const (
@@ -88,7 +91,7 @@ func (m *MockedWriter) Template() string {
 	return m.template
 }
 
-func (m *MockedWriter) Init(props properties.Properties, env platform.Environment) {}
+func (m *MockedWriter) Init(_ properties.Properties, _ platform.Environment) {}
 
 func TestIconOverride(t *testing.T) {
 	cases := []struct {
@@ -195,7 +198,7 @@ func TestSegmentTemplateMigration(t *testing.T) {
 	}{
 		{
 			Case:     "GIT",
-			Expected: " {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} working {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} and{{ end }}{{ if .Staging.Changed }} staged {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}} stash {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}} worktree {{ .WorktreeCount }}{{ end }} ", //nolint: lll
+			Expected: " {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} working {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} and{{ end }}{{ if .Staging.Changed }} staged {{ .Staging.String }}{{ end }} ", //nolint: lll
 			Type:     GIT,
 			Props: properties.Map{
 				"local_working_icon":    " working ",
@@ -207,7 +210,7 @@ func TestSegmentTemplateMigration(t *testing.T) {
 		},
 		{
 			Case:     "GIT - Staging and Working Color",
-			Expected: " {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} working <#123456>{{ .Working.String }}</>{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} and{{ end }}{{ if .Staging.Changed }} staged <#123456>{{ .Staging.String }}</>{{ end }}{{ if gt .StashCount 0}} stash {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}} worktree {{ .WorktreeCount }}{{ end }} ", //nolint: lll
+			Expected: " {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} working <#123456>{{ .Working.String }}</>{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} and{{ end }}{{ if .Staging.Changed }} staged <#123456>{{ .Staging.String }}</>{{ end }} ", //nolint: lll
 			Type:     GIT,
 			Props: properties.Map{
 				"local_working_icon":    " working ",
@@ -278,7 +281,7 @@ func TestSegmentTemplateMigration(t *testing.T) {
 		},
 		{
 			Case:     "SESSION no HOST",
-			Expected: " {{ if .SSHSession }}\uf817 {{ end }}{{ .UserName }} ",
+			Expected: " {{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }} ",
 			Type:     SESSION,
 			Props: properties.Map{
 				"display_host": false,
@@ -286,7 +289,7 @@ func TestSegmentTemplateMigration(t *testing.T) {
 		},
 		{
 			Case:     "SESSION no USER",
-			Expected: " {{ if .SSHSession }}\uf817 {{ end }}{{ .HostName }} ",
+			Expected: " {{ if .SSHSession }}\ueba9 {{ end }}{{ .HostName }} ",
 			Type:     SESSION,
 			Props: properties.Map{
 				"display_user": false,
@@ -294,7 +297,7 @@ func TestSegmentTemplateMigration(t *testing.T) {
 		},
 		{
 			Case:     "SESSION no USER nor HOST",
-			Expected: " {{ if .SSHSession }}\uf817 {{ end }} ",
+			Expected: " {{ if .SSHSession }}\ueba9 {{ end }} ",
 			Type:     SESSION,
 			Props: properties.Map{
 				"display_user": false,
@@ -303,7 +306,7 @@ func TestSegmentTemplateMigration(t *testing.T) {
 		},
 		{
 			Case:     "SESSION - Color overrides",
-			Expected: " {{ if .SSHSession }}\uf817 {{ end }}<#123456>{{ .UserName }}</>@<#789012>{{ .HostName }}</> ",
+			Expected: " {{ if .SSHSession }}\ueba9 {{ end }}<#123456>{{ .UserName }}</>@<#789012>{{ .HostName }}</> ",
 			Type:     SESSION,
 			Props: properties.Map{
 				"user_color": "#123456",
@@ -324,7 +327,9 @@ func TestSegmentTemplateMigration(t *testing.T) {
 			Type:       tc.Type,
 			Properties: tc.Props,
 		}
-		segment.migrationOne(&mock.MockedEnvironment{})
+		env := &mock.MockedEnvironment{}
+		env.On("Debug", mock2.Anything).Return(nil)
+		segment.migrationOne(env)
 		assert.Equal(t, tc.Expected, segment.Properties[segmentTemplate], tc.Case)
 	}
 }
@@ -384,7 +389,7 @@ func TestMigratePreAndPostfix(t *testing.T) {
 		},
 		{
 			Case:     "Prefix",
-			Expected: " {{ .Name }} ",
+			Expected: segments.NameTemplate,
 			Props: properties.Map{
 				"prefix":   " ",
 				"template": "{{ .Name }}",
@@ -392,7 +397,7 @@ func TestMigratePreAndPostfix(t *testing.T) {
 		},
 		{
 			Case:     "Postfix",
-			Expected: " {{ .Name }} ",
+			Expected: segments.NameTemplate,
 			Props: properties.Map{
 				"postfix":  " ",
 				"template": "{{ .Name }} ",
@@ -426,8 +431,9 @@ func TestMigrateConfig(t *testing.T) {
 	for _, tc := range cases {
 		cfg := &Config{
 			ConsoleTitleTemplate: tc.Template,
+			env:                  &mock.MockedEnvironment{},
 		}
-		cfg.Migrate(&mock.MockedEnvironment{})
+		cfg.Migrate()
 		assert.Equal(t, tc.Expected, cfg.ConsoleTitleTemplate, tc.Case)
 	}
 }

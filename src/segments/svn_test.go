@@ -1,10 +1,11 @@
 package segments
 
 import (
-	"oh-my-posh/mock"
-	"oh-my-posh/platform"
-	"oh-my-posh/properties"
 	"testing"
+
+	"github.com/jandedobbeleer/oh-my-posh/src/mock"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -36,6 +37,8 @@ func TestSvnEnabledInWorkingDirectory(t *testing.T) {
 	env.On("GOOS").Return("")
 	env.On("FileContent", "/dir/hello/trunk").Return("")
 	env.MockSvnCommand(fileInfo.Path, "", "info", "--tags", "--exact-match")
+	env.On("RunCommand", "svn", []string{"info", "/dir/hello", "--show-item", "revision"}).Return("", nil)
+	env.On("RunCommand", "svn", []string{"info", "/dir/hello", "--show-item", "relative-url"}).Return("", nil)
 	env.On("IsWsl").Return(false)
 	env.On("HasParentFilePath", ".svn").Return(fileInfo, nil)
 	s := &Svn{
@@ -58,13 +61,14 @@ func TestSvnTemplateString(t *testing.T) {
 	}{
 		{
 			Case:     "Default template",
-			Expected: "\ue0a0trunk r2 +2 ~3 -7 >13 x5 !1",
+			Expected: "\ue0a0trunk r2 ?9 +2 ~3 -7 >13 x5 !1",
 			Template: " \ue0a0{{.Branch}} r{{.BaseRev}} {{.Working.String}} ",
 			Svn: &Svn{
 				Branch:  "trunk",
 				BaseRev: 2,
 				Working: &SvnStatus{
 					ScmStatus: ScmStatus{
+						Untracked:  9,
 						Added:      2,
 						Conflicted: 1,
 						Deleted:    7,
@@ -175,41 +179,47 @@ func TestSetSvnStatus(t *testing.T) {
 		{
 			Case: "changed",
 			StatusOutput: `
-!       Untracked.File
+?       Untracked.File
+!       Missing.File
 A       FileHasBeen.Added
 D       FileMarkedAs.Deleted
 M       Modified.File
+C       Conflicted.File
 R       Moved.File`,
 			ExpectedWorking: &SvnStatus{ScmStatus: ScmStatus{
-				Modified: 1,
-				Added:    1,
-				Deleted:  1,
-				Unmerged: 1,
-				Moved:    1,
+				Modified:   1,
+				Added:      1,
+				Deleted:    1,
+				Moved:      2,
+				Untracked:  1,
+				Conflicted: 1,
+				Formats:    map[string]string{},
 			}},
-			RefOutput:       "1133",
-			ExpectedRef:     1133,
-			BranchOutput:    "^/trunk",
-			ExpectedBranch:  "trunk",
-			ExpectedChanged: true,
+			RefOutput:         "1133",
+			ExpectedRef:       1133,
+			BranchOutput:      "^/trunk",
+			ExpectedBranch:    "trunk",
+			ExpectedChanged:   true,
+			ExpectedConflicts: true,
 		},
 		{
 			Case:         "conflict",
 			StatusOutput: `C       build.cake`,
 			ExpectedWorking: &SvnStatus{ScmStatus: ScmStatus{
 				Conflicted: 1,
+				Formats:    map[string]string{},
 			}},
 			ExpectedChanged:   true,
 			ExpectedConflicts: true,
 		},
 		{
 			Case:            "no change",
-			ExpectedWorking: &SvnStatus{ScmStatus: ScmStatus{}},
+			ExpectedWorking: &SvnStatus{ScmStatus: ScmStatus{Formats: map[string]string{}}},
 			ExpectedChanged: false,
 		},
 		{
 			Case:            "not an integer ref",
-			ExpectedWorking: &SvnStatus{ScmStatus: ScmStatus{}},
+			ExpectedWorking: &SvnStatus{ScmStatus: ScmStatus{Formats: map[string]string{}}},
 			ExpectedChanged: false,
 			RefOutput:       "not an integer",
 		},
@@ -234,8 +244,10 @@ R       Moved.File`,
 
 		s := &Svn{
 			scm: scm{
-				env:     env,
-				props:   properties.Map{},
+				env: env,
+				props: properties.Map{
+					FetchStatus: true,
+				},
 				command: SVNCOMMAND,
 			},
 		}

@@ -1,10 +1,11 @@
 package segments
 
 import (
-	"oh-my-posh/mock"
-	"oh-my-posh/platform"
-	"oh-my-posh/properties"
 	"testing"
+
+	"github.com/jandedobbeleer/oh-my-posh/src/mock"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -17,6 +18,7 @@ func TestOSInfo(t *testing.T) {
 		IsWSL             bool
 		Platform          string
 		DisplayDistroName bool
+		Icon              string
 	}{
 		{
 			Case:           "WSL debian - icon",
@@ -61,6 +63,19 @@ func TestOSInfo(t *testing.T) {
 			ExpectedString: "unknown",
 			GOOS:           "unknown",
 		},
+		{
+			Case:           "crazy distro, specific icon",
+			ExpectedString: "crazy distro",
+			GOOS:           "linux",
+			Platform:       "crazy",
+			Icon:           "crazy distro",
+		},
+		{
+			Case:           "crazy distro, not mapped",
+			ExpectedString: "\uf17c",
+			GOOS:           "linux",
+			Platform:       "crazy",
+		},
 	}
 	for _, tc := range cases {
 		env := new(mock.MockedEnvironment)
@@ -70,14 +85,22 @@ func TestOSInfo(t *testing.T) {
 			Env: make(map[string]string),
 			WSL: tc.IsWSL,
 		})
-		osInfo := &Os{
-			env: env,
-			props: properties.Map{
-				DisplayDistroName: tc.DisplayDistroName,
-				Windows:           "windows",
-				MacOS:             "darwin",
-			},
+
+		props := properties.Map{
+			DisplayDistroName: tc.DisplayDistroName,
+			Windows:           "windows",
+			MacOS:             "darwin",
 		}
+
+		if len(tc.Icon) != 0 {
+			props[properties.Property(tc.Platform)] = tc.Icon
+		}
+
+		osInfo := &Os{
+			env:   env,
+			props: props,
+		}
+
 		_ = osInfo.Enabled()
 		assert.Equal(t, tc.ExpectedString, renderTemplate(env, osInfo.Template(), osInfo), tc.Case)
 	}

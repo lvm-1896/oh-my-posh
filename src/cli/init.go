@@ -2,20 +2,21 @@ package cli
 
 import (
 	"fmt"
-	"oh-my-posh/engine"
-	"oh-my-posh/platform"
-	"oh-my-posh/shell"
+
+	"github.com/jandedobbeleer/oh-my-posh/src/engine"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/shell"
 
 	"github.com/spf13/cobra"
 )
 
 var (
-	print  bool
-	strict bool
-	manual bool
+	printOutput bool
+	strict      bool
+	manual      bool
 
 	initCmd = &cobra.Command{
-		Use:   "init [bash|zsh|fish|powershell|pwsh|cmd|nu|yash] --config ~/.mytheme.omp.json",
+		Use:   "init [bash|zsh|fish|powershell|pwsh|cmd|nu|tcsh|elvish|xonsh|yash]",
 		Short: "Initialize your shell and config",
 		Long: `Initialize your shell and config.
 
@@ -29,6 +30,9 @@ See the documentation to initialize your shell: https://ohmyposh.dev/docs/instal
 			"pwsh",
 			"cmd",
 			"nu",
+			"tcsh",
+			"elvish",
+			"xonsh",
 		},
 		Args: NoArgsOrOneValidArg,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -42,7 +46,7 @@ See the documentation to initialize your shell: https://ohmyposh.dev/docs/instal
 )
 
 func init() { //nolint:gochecknoinits
-	initCmd.Flags().BoolVarP(&print, "print", "p", false, "print the init script")
+	initCmd.Flags().BoolVarP(&printOutput, "print", "p", false, "print the init script")
 	initCmd.Flags().BoolVarP(&strict, "strict", "s", false, "run in strict mode")
 	initCmd.Flags().BoolVarP(&manual, "manual", "m", false, "enable/disable manual mode")
 	_ = initCmd.MarkPersistentFlagRequired("config")
@@ -51,7 +55,6 @@ func init() { //nolint:gochecknoinits
 
 func runInit(shellName string) {
 	env := &platform.Shell{
-		Version: cliVersion,
 		CmdFlags: &platform.Flags{
 			Shell:  shellName,
 			Config: config,
@@ -65,12 +68,17 @@ func runInit(shellName string) {
 	shell.Transient = cfg.TransientPrompt != nil
 	shell.ErrorLine = cfg.ErrorLine != nil || cfg.ValidLine != nil
 	shell.Tooltips = len(cfg.Tooltips) > 0
-	for _, block := range cfg.Blocks {
+	shell.ShellIntegration = cfg.ShellIntegration
+	for i, block := range cfg.Blocks {
+		// only fetch cursor position when relevant
+		if !cfg.DisableCursorPositioning && (i == 0 && block.Newline) {
+			shell.CursorPositioning = true
+		}
 		if block.Type == engine.RPrompt {
 			shell.RPrompt = true
 		}
 	}
-	if print {
+	if printOutput {
 		init := shell.PrintInit(env)
 		fmt.Print(init)
 		return

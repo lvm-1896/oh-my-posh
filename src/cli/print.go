@@ -2,11 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"oh-my-posh/color"
-	"oh-my-posh/console"
-	"oh-my-posh/engine"
-	"oh-my-posh/platform"
-	"oh-my-posh/shell"
+
+	"github.com/jandedobbeleer/oh-my-posh/src/engine"
+	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 
 	"github.com/spf13/cobra"
 )
@@ -14,15 +12,19 @@ import (
 var (
 	pwd           string
 	pswd          string
-	exitCode      int
+	status        int
+	pipestatus    string
 	timing        float64
 	stackCount    int
 	terminalWidth int
 	eval          bool
+	cleared       bool
 
 	command      string
 	shellVersion string
 	plain        bool
+	noStatus     bool
+	column       int
 )
 
 // printCmd represents the prompt command
@@ -46,70 +48,46 @@ var printCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		env := &platform.Shell{
-			Version: cliVersion,
-			CmdFlags: &platform.Flags{
-				Config:        config,
-				PWD:           pwd,
-				PSWD:          pswd,
-				ErrorCode:     exitCode,
-				ExecutionTime: timing,
-				StackCount:    stackCount,
-				TerminalWidth: terminalWidth,
-				Eval:          eval,
-				Shell:         shellName,
-				ShellVersion:  shellVersion,
-			},
+
+		flags := &platform.Flags{
+			Config:        config,
+			PWD:           pwd,
+			PSWD:          pswd,
+			ErrorCode:     status,
+			PipeStatus:    pipestatus,
+			ExecutionTime: timing,
+			StackCount:    stackCount,
+			TerminalWidth: terminalWidth,
+			Eval:          eval,
+			Shell:         shellName,
+			ShellVersion:  shellVersion,
+			Plain:         plain,
+			Primary:       args[0] == "primary",
+			Cleared:       cleared,
+			NoExitCode:    noStatus,
+			Column:        column,
 		}
-		env.Init()
-		defer env.Close()
-		cfg := engine.LoadConfig(env)
-		ansi := &color.Ansi{}
-		ansi.Init(env.Shell())
-		var writer color.Writer
-		if plain {
-			ansi.InitPlain()
-			writer = &color.PlainWriter{
-				Ansi: ansi,
-			}
-		} else {
-			writerColors := cfg.MakeColors()
-			writer = &color.AnsiWriter{
-				Ansi:               ansi,
-				TerminalBackground: shell.ConsoleBackgroundColor(env, cfg.TerminalBackground),
-				AnsiColors:         writerColors,
-			}
-		}
-		consoleTitle := &console.Title{
-			Env:      env,
-			Ansi:     ansi,
-			Template: cfg.ConsoleTitleTemplate,
-		}
-		eng := &engine.Engine{
-			Config:       cfg,
-			Env:          env,
-			Writer:       writer,
-			ConsoleTitle: consoleTitle,
-			Ansi:         ansi,
-			Plain:        plain,
-		}
+
+		eng := engine.New(flags)
+		defer eng.Env.Close()
+
 		switch args[0] {
 		case "debug":
-			fmt.Print(eng.PrintExtraPrompt(engine.Debug))
+			fmt.Print(eng.ExtraPrompt(engine.Debug))
 		case "primary":
-			fmt.Print(eng.PrintPrimary())
+			fmt.Print(eng.Primary())
 		case "secondary":
-			fmt.Print(eng.PrintExtraPrompt(engine.Secondary))
+			fmt.Print(eng.ExtraPrompt(engine.Secondary))
 		case "transient":
-			fmt.Print(eng.PrintExtraPrompt(engine.Transient))
+			fmt.Print(eng.ExtraPrompt(engine.Transient))
 		case "right":
-			fmt.Print(eng.PrintRPrompt())
+			fmt.Print(eng.RPrompt())
 		case "tooltip":
-			fmt.Print(eng.PrintTooltip(command))
+			fmt.Print(eng.Tooltip(command))
 		case "valid":
-			fmt.Print(eng.PrintExtraPrompt(engine.Valid))
+			fmt.Print(eng.ExtraPrompt(engine.Valid))
 		case "error":
-			fmt.Print(eng.PrintExtraPrompt(engine.Error))
+			fmt.Print(eng.ExtraPrompt(engine.Error))
 		default:
 			_ = cmd.Help()
 		}
@@ -121,12 +99,19 @@ func init() { //nolint:gochecknoinits
 	printCmd.Flags().StringVar(&pswd, "pswd", "", "current working directory (according to pwsh)")
 	printCmd.Flags().StringVar(&shellName, "shell", "", "the shell to print for")
 	printCmd.Flags().StringVar(&shellVersion, "shell-version", "", "the shell version")
-	printCmd.Flags().IntVarP(&exitCode, "error", "e", 0, "last exit code")
+	printCmd.Flags().IntVar(&status, "status", 0, "last known status code")
+	printCmd.Flags().BoolVar(&noStatus, "no-status", false, "no valid status code (cancelled or no command yet)")
+	printCmd.Flags().StringVar(&pipestatus, "pipestatus", "", "the PIPESTATUS array")
 	printCmd.Flags().Float64Var(&timing, "execution-time", 0, "timing of the last command")
 	printCmd.Flags().IntVarP(&stackCount, "stack-count", "s", 0, "number of locations on the stack")
 	printCmd.Flags().IntVarP(&terminalWidth, "terminal-width", "w", 0, "width of the terminal")
 	printCmd.Flags().StringVar(&command, "command", "", "tooltip command")
 	printCmd.Flags().BoolVarP(&plain, "plain", "p", false, "plain text output (no ANSI)")
+	printCmd.Flags().BoolVar(&cleared, "cleared", false, "do we have a clear terminal or not")
 	printCmd.Flags().BoolVar(&eval, "eval", false, "output the prompt for eval")
+	printCmd.Flags().IntVar(&column, "column", 0, "the column position of the cursor")
+	// Deprecated flags
+	printCmd.Flags().IntVarP(&status, "error", "e", 0, "last exit code")
+	printCmd.Flags().BoolVar(&noStatus, "no-exit-code", false, "no valid exit code (cancelled or no command yet)")
 	RootCmd.AddCommand(printCmd)
 }

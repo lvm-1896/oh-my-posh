@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "http://example.com/example.json",
+  "$id": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "type": "object",
   "title": "The Oh My Posh theme definition",
   "description": "https://ohmyposh.dev/docs/configuration/overview",
@@ -82,7 +82,12 @@
       "type": "string",
       "title": "Display Mode",
       "description": "Determines whether the segment is displayed always or only if a file matching the extensions are present in the current folder",
-      "enum": ["always", "files", "environment", "context"],
+      "enum": [
+        "always",
+        "files",
+        "environment",
+        "context"
+      ],
       "default": "context"
     },
     "missing_command_text": {
@@ -96,6 +101,12 @@
       "title": "Version Url Template",
       "description": "Template that creates the URL of the version info / release notes",
       "default": ""
+    },
+    "status_formats": {
+      "type": "object",
+      "title": "Status string formats",
+      "description": "Override the status format for a specific change. Example: {\"Added\": \"Added: %d\"}",
+      "default": {}
     },
     "extra_prompt": {
       "type": "object",
@@ -134,7 +145,11 @@
             }
           },
           "then": {
-            "required": ["type", "alignment", "segments"],
+            "required": [
+              "type",
+              "alignment",
+              "segments"
+            ],
             "title": "Prompt definition, contains 1 or more segments to render"
           }
         },
@@ -147,7 +162,10 @@
             }
           },
           "then": {
-            "required": ["type", "segments"],
+            "required": [
+              "type",
+              "segments"
+            ],
             "title": "RPrompt definition, contains 1 or more segments to render to the right of the cursor"
           }
         },
@@ -168,7 +186,10 @@
                 "type": "string",
                 "title": "Block overflow",
                 "description": "https://ohmyposh.dev/docs/configuration/block#overflow",
-                "enum": ["break", "hide"],
+                "enum": [
+                  "break",
+                  "hide"
+                ],
                 "default": ""
               }
             }
@@ -180,14 +201,20 @@
           "type": "string",
           "title": "Block type",
           "description": "https://ohmyposh.dev/docs/configuration/block#type",
-          "enum": ["prompt", "rprompt"],
+          "enum": [
+            "prompt",
+            "rprompt"
+          ],
           "default": "prompt"
         },
         "alignment": {
           "type": "string",
           "title": "Block alignment",
           "description": "https://ohmyposh.dev/docs/configuration/block#alignment",
-          "enum": ["left", "right"],
+          "enum": [
+            "left",
+            "right"
+          ],
           "default": "left"
         },
         "newline": {
@@ -212,7 +239,10 @@
       "title": "A segment",
       "description": "https://ohmyposh.dev/docs/configuration/segment",
       "default": {},
-      "required": ["type", "style"],
+      "required": [
+        "type",
+        "style"
+      ],
       "properties": {
         "type": {
           "type": "string",
@@ -231,14 +261,15 @@
             "cf",
             "cftarget",
             "cmake",
+            "docker",
             "dotnet",
             "dart",
-            "exit",
             "executiontime",
             "flutter",
             "fossil",
             "gcp",
             "git",
+            "gitversion",
             "go",
             "haskell",
             "ipify",
@@ -248,6 +279,7 @@
             "kotlin",
             "kubectl",
             "lua",
+            "mercurial",
             "node",
             "npm",
             "nx",
@@ -263,8 +295,11 @@
             "ruby",
             "rust",
             "r",
+            "sapling",
             "session",
+            "sitecore",
             "spotify",
+            "status",
             "shell",
             "sysinfo",
             "strava",
@@ -274,6 +309,8 @@
             "text",
             "terraform",
             "ui5tooling",
+            "unity",
+            "upgrade",
             "wakatime",
             "winreg",
             "withings",
@@ -282,10 +319,21 @@
           ]
         },
         "style": {
-          "type": "string",
           "title": "Segment Style",
           "description": "https://ohmyposh.dev/docs/configuration/segment#style",
-          "enum": ["plain", "powerline", "diamond", "accordion"]
+          "anyOf": [
+            {
+              "enum": [
+                "plain",
+                "powerline",
+                "diamond",
+                "accordion"
+              ]
+            },
+            {
+              "type": "string"
+            }
+          ]
         },
         "foreground": {
           "$ref": "#/definitions/color"
@@ -315,7 +363,22 @@
           "type": "string",
           "title": "Templates Logic",
           "description": "https://ohmyposh.dev/docs/configuration/segment#templates",
-          "enum": ["first_match", "join"]
+          "enum": [
+            "first_match",
+            "join"
+          ]
+        },
+        "max_cols": {
+          "type": "integer",
+          "title": "if the terminal width exceeds this value, the segment will be hidden",
+          "description": "https://ohmyposh.dev/docs/configuration/segment#max_cols",
+          "default": 0
+        },
+        "min_cols": {
+          "type": "integer",
+          "title": "if the terminal width is inferior than this value, the segment will be hidden",
+          "description": "https://ohmyposh.dev/docs/configuration/segment#min_cols",
+          "default": 0
         },
         "properties": {
           "type": "object",
@@ -377,7 +440,7 @@
           },
           "then": {
             "title": "Project Segment",
-            "description": "https://ohmyposh.dev/docs/project"
+            "description": "https://ohmyposh.dev/docs/segments/project"
           }
         },
         {
@@ -390,7 +453,7 @@
           },
           "then": {
             "title": "NPM Segment",
-            "description": "https://ohmyposh.dev/docs/npm",
+            "description": "https://ohmyposh.dev/docs/segments/npm",
             "properties": {
               "properties": {
                 "properties": {
@@ -474,16 +537,20 @@
           },
           "then": {
             "title": "Azure Segment",
-            "description": "https://ohmyposh.dev/docs/az",
+            "description": "https://ohmyposh.dev/docs/segments/az",
             "properties": {
               "properties": {
                 "properties": {
                   "source": {
                     "type": "string",
                     "title": "Source",
-                    "description": "https://ohmyposh.dev/docs/az#properties",
+                    "description": "https://ohmyposh.dev/docs/segments/az#properties",
                     "default": "first_match",
-                    "enum": ["first_match", "cli", "pwsh"]
+                    "enum": [
+                      "first_match",
+                      "cli",
+                      "pwsh"
+                    ]
                   }
                 }
               }
@@ -663,6 +730,19 @@
           "if": {
             "properties": {
               "type": {
+                "const": "docker"
+              }
+            }
+          },
+          "then": {
+            "title": "Docker Segment",
+            "description": "https://ohmyposh.dev/docs/segments/docker"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "dotnet"
               }
             }
@@ -697,13 +777,13 @@
           "if": {
             "properties": {
               "type": {
-                "const": "exit"
+                "const": "status"
               }
             }
           },
           "then": {
-            "title": "Exit Segment",
-            "description": "https://ohmyposh.dev/docs/segments/exit",
+            "title": "Status Segment",
+            "description": "https://ohmyposh.dev/docs/segments/status",
             "properties": {
               "properties": {
                 "properties": {
@@ -900,7 +980,7 @@
                     "type": "string",
                     "title": "Azure DevOps Icon",
                     "description": "Icon/text to display when the upstream is Azure DevOps",
-                    "default": "\uFD03"
+                    "default": "\uEBE8"
                   },
                   "git_icon": {
                     "type": "string",
@@ -925,6 +1005,24 @@
                     "title": "Ignore submodules",
                     "description": "Ignore changes to submodules when looking for changes",
                     "default": {}
+                  },
+                  "ignore_status": {
+                    "type": "array",
+                    "title": "Ignore fetching status in these repo's",
+                    "description": "Ignore fetching status for certain repo's, uses the same logic as the exclude_folders property",
+                    "default": [],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "fetch_user": {
+                    "type": "boolean",
+                    "title": "Fetch the user",
+                    "description": "Fetch the current configured user for the repository",
+                    "default": false
+                  },
+                  "status_formats": {
+                    "$ref": "#/definitions/status_formats"
                   }
                 }
               }
@@ -1318,6 +1416,12 @@
                     "title": "Parse kubeconfig",
                     "description": "Parse kubeconfig files instead of calling out to kubectl to improve performance.",
                     "default": false
+                  },
+                  "context_aliases": {
+                    "type": "object",
+                    "title": "Context aliases",
+                    "description": "Custom context names.",
+                    "default": {}
                   }
                 }
               }
@@ -1601,6 +1705,12 @@
                     "title": "Alma Icon",
                     "description": "The icon to use for Alma",
                     "default": "\uF31D"
+                  },
+                  "android": {
+                    "type": "string",
+                    "title": "Android Icon",
+                    "description": "The icon to use for Alma",
+                    "default": "\uf17b"
                   }
                 }
               }
@@ -1659,7 +1769,8 @@
                       "folder",
                       "mixed",
                       "letter",
-                      "unique"
+                      "unique",
+                      "powerlevel"
                     ],
                     "default": "folder"
                   },
@@ -1692,6 +1803,31 @@
                     "title": "Hide the root location",
                     "description": "Hides the root location, when using agnoster_short style, if it doesn't fit in the last max_depth folders.",
                     "default": false
+                  },
+                  "cycle": {
+                    "type": "array",
+                    "title": "Color overrides to use to cycle through and color the path per folder",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cycle_folder_separator": {
+                    "type": "boolean",
+                    "title": "Cycle the folder_separator_icon",
+                    "description": "Colorize the folder_separator_icon as well when using a cycle.",
+                    "default": false
+                  },
+                  "folder_format": {
+                    "type": "string",
+                    "title": "The folder format",
+                    "description": "Golang string format to apply to the folder name",
+                    "pattern": ".*%s.*"
+                  },
+                  "edge_format": {
+                    "type": "string",
+                    "title": "The format to use on the start and end folder",
+                    "description": "Golang string format to apply to the start and end folder",
+                    "pattern": ".*%s.*"
                   }
                 }
               }
@@ -1748,6 +1884,43 @@
           "if": {
             "properties": {
               "type": {
+                "const": "quasar"
+              }
+            }
+          },
+          "then": {
+            "title": "Quasar Segment",
+            "description": "https://ohmyposh.dev/docs/segments/quasar",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "home_enabled": {
+                    "$ref": "#/definitions/home_enabled"
+                  },
+                  "fetch_version": {
+                    "$ref": "#/definitions/fetch_version"
+                  },
+                  "missing_command_text": {
+                    "$ref": "#/definitions/missing_command_text"
+                  },
+                  "version_url_template": {
+                    "$ref": "#/definitions/version_url_template"
+                  },
+                  "fetch_dependencies": {
+                    "type": "boolean",
+                    "title": "Fetch Dependencies",
+                    "description": "Fetch the vite and @quasar/app-vite dependency information or not",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "root"
               }
             }
@@ -1755,6 +1928,34 @@
           "then": {
             "title": "Root Segment",
             "description": "https://ohmyposh.dev/docs/segments/root"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "sapling"
+              }
+            }
+          },
+          "then": {
+            "title": "Sapling Segment",
+            "description": "https://ohmyposh.dev/docs/segments/sapling",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "fetch_status": {
+                    "type": "boolean",
+                    "title": "Display Status",
+                    "description": "Display the local changes or not",
+                    "default": true
+                  },
+                  "status_formats": {
+                    "$ref": "#/definitions/status_formats"
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -1801,6 +2002,31 @@
                     "title": "Custom Text",
                     "description": "Custom glyph/text for specific shells",
                     "default": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "sitecore"
+              }
+            }
+          },
+          "then": {
+            "title": "Sitecore Segment",
+            "description": "https://ohmyposh.dev/docs/segments/sitecore",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "display_default": {
+                    "type": "boolean",
+                    "title": "Display Default",
+                    "description": "Display the segment or not when the Sitecore environment name matches `default`",
+                    "default": true
                   }
                 }
               }
@@ -1996,13 +2222,48 @@
                     "title": "units",
                     "description": "Units of measurement. Available values are standard (kelvin), metric (celsius), and imperial (fahrenheit). Default is standard",
                     "default": "standard",
-                    "enum": ["standard", "metric", "imperial"]
+                    "enum": [
+                      "standard",
+                      "metric",
+                      "imperial"
+                    ]
                   },
                   "http_timeout": {
                     "$ref": "#/definitions/http_timeout"
                   },
                   "cache_timeout": {
                     "$ref": "#/definitions/cache_timeout"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "elixir"
+              }
+            }
+          },
+          "then": {
+            "title": "Elixir Segment",
+            "description": "https://ohmyposh.dev/docs/segments/elixir",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "home_enabled": {
+                    "$ref": "#/definitions/home_enabled"
+                  },
+                  "fetch_version": {
+                    "$ref": "#/definitions/fetch_version"
+                  },
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  },
+                  "missing_command_text": {
+                    "$ref": "#/definitions/missing_command_text"
                   }
                 }
               }
@@ -2047,7 +2308,8 @@
                       "galvestonms",
                       "houston",
                       "amarillo",
-                      "round"
+                      "round",
+                      "lucky7"
                     ],
                     "default": "austin"
                   }
@@ -2105,13 +2367,13 @@
                     "type": "string",
                     "title": "Alternative icon",
                     "description": "Alternative icon for this activity type",
-                    "default": "\uf5a2"
+                    "default": "\uf206"
                   },
                   "run_icon": {
                     "type": "string",
                     "title": "Alternative icon",
                     "description": "Alternative icon for this activity type",
-                    "default": "\ufc0c"
+                    "default": "\ue213"
                   },
                   "skiing_icon": {
                     "type": "string",
@@ -2170,6 +2432,9 @@
                     "title": "Display Status",
                     "description": "Display the local changes or not",
                     "default": true
+                  },
+                  "status_formats": {
+                    "$ref": "#/definitions/status_formats"
                   }
                 }
               }
@@ -2383,6 +2648,9 @@
                     "title": "Full branch path",
                     "description": "display the full branch path instead of only the branch name",
                     "default": false
+                  },
+                  "status_formats": {
+                    "$ref": "#/definitions/status_formats"
                   }
                 }
               }
@@ -2399,7 +2667,7 @@
           },
           "then": {
             "title": "Brewfather Batch Status",
-            "description": "https://ohmyposh.dev/docs/brewfather",
+            "description": "https://ohmyposh.dev/docs/segments/brewfather",
             "properties": {
               "properties": {
                 "properties": {
@@ -2580,7 +2848,11 @@
                     "type": "string",
                     "title": "Use Stack GHC",
                     "description": "Get the GHC version used by Stack. Will decrease performance. Boolean indicating whether stack ghc was used available in template as .StackGhc",
-                    "enum": ["always", "package", "never"],
+                    "enum": [
+                      "always",
+                      "package",
+                      "never"
+                    ],
                     "default": "never"
                   }
                 }
@@ -2616,6 +2888,81 @@
                   },
                   "version_url_template": {
                     "$ref": "#/definitions/version_url_template"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "unity"
+              }
+            }
+          },
+          "then": {
+            "title": "Unity Segment",
+            "description": "https://ohmyposh.dev/docs/segments/unity",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "http_timeout": {
+                    "$ref": "#/definitions/http_timeout"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "upgrade"
+              }
+            }
+          },
+          "then": {
+            "title": "Upgrade Segment",
+            "description": "https://ohmyposh.dev/docs/segments/upgrade",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "cache_timeout": {
+                    "$ref": "#/definitions/cache_timeout"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "vala"
+              }
+            }
+          },
+          "then": {
+            "title": "Vala Segment",
+            "description": "https://ohmyposh.dev/docs/segments/vala",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "home_enabled": {
+                    "$ref": "#/definitions/home_enabled"
+                  },
+                  "fetch_version": {
+                    "$ref": "#/definitions/fetch_version"
+                  },
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  },
+                  "missing_command_text": {
+                    "$ref": "#/definitions/missing_command_text"
                   }
                 }
               }
@@ -2666,7 +3013,16 @@
           },
           "then": {
             "title": "Clound Foundry Target segment",
-            "description": "https://ohmyposh.dev/docs/segments/cftarget"
+            "description": "https://ohmyposh.dev/docs/segments/cftarget",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -2736,7 +3092,10 @@
                     "type": "string",
                     "title": "Preferred Executable",
                     "description": "The preferred executable to use when fetching the version.",
-                    "enum": ["lua", "luajit"],
+                    "enum": [
+                      "lua",
+                      "luajit"
+                    ],
                     "default": "lua"
                   }
                 }
@@ -2855,11 +3214,54 @@
             "title": "GCP Segment",
             "description": "https://ohmyposh.dev/docs/segments/gcp"
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "gitversion"
+              }
+            }
+          },
+          "then": {
+            "title": "Display GitVersion segment",
+            "description": "https://ohmyposh.dev/docs/segments/gitversion"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "mercurial"
+              }
+            }
+          },
+          "then": {
+            "title": "Mercurial Segment",
+            "description": "https://ohmyposh.dev/docs/segments/mercurial",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "fetch_status": {
+                    "type": "boolean",
+                    "title": "Display Status",
+                    "description": "Display the local changes or not",
+                    "default": true
+                  },
+                  "status_formats": {
+                    "$ref": "#/definitions/status_formats"
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     }
   },
-  "required": ["blocks"],
+  "required": [
+    "blocks"
+  ],
   "properties": {
     "final_space": {
       "type": "boolean",
@@ -2867,9 +3269,20 @@
       "description": "https://ohmyposh.dev/docs/configuration/overview#general-settings",
       "default": true
     },
+    "disable_cursor_positioning": {
+      "type": "boolean",
+      "title": "Disable Cursor Positioning",
+      "description": "https://ohmyposh.dev/docs/configuration/overview#general-settings",
+      "default": false
+    },
+    "shell_integration": {
+      "type": "boolean",
+      "title": "FTCS command marks for shell integration",
+      "default": false
+    },
     "pwd": {
       "type": "string",
-      "title": "Enable OSC99/7",
+      "title": "Enable OSC99/7/51",
       "description": "https://ohmyposh.dev/docs/configuration/overview#general-settings",
       "default": ""
     },
@@ -2911,13 +3324,22 @@
             }
           }
         },
-        "required": ["tips"]
+        "required": [
+          "tips"
+        ]
       }
     },
     "transient_prompt": {
       "$ref": "#/definitions/extra_prompt",
       "title": "Transient Prompt Setting",
-      "description": "https://ohmyposh.dev/docs/configuration/transient"
+      "description": "https://ohmyposh.dev/docs/configuration/transient",
+      "properties": {
+        "filler": {
+          "type": "string",
+          "title": "Filler",
+          "description": "Right aligned filler text, will span the remaining width"
+        }
+      }
     },
     "valid_line": {
       "$ref": "#/definitions/extra_prompt",
@@ -2967,6 +3389,22 @@
             ".*": {
               "$ref": "#/properties/palette"
             }
+          }
+        }
+      }
+    },
+    "cycle": {
+      "type": "array",
+      "title": "List of settings to cycle through segment by segment",
+      "description": "https://ohmyposh.dev/docs/configuration/cycle",
+      "default": [],
+      "items": {
+        "properties": {
+          "foreground": {
+            "$ref": "#/definitions/color"
+          },
+          "background": {
+            "$ref": "#/definitions/color"
           }
         }
       }
