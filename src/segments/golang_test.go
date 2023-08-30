@@ -11,6 +11,7 @@ import (
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 
 	"github.com/stretchr/testify/assert"
+	mock2 "github.com/stretchr/testify/mock"
 )
 
 type mockedLanguageParams struct {
@@ -30,6 +31,7 @@ func getMockedLanguageEnv(params *mockedLanguageParams) (*mock.MockedEnvironment
 	env.On("TemplateCache").Return(&platform.TemplateCache{
 		Env: make(map[string]string),
 	})
+	env.On("DebugF", mock2.Anything, mock2.Anything).Return(nil)
 	props := properties.Map{
 		properties.FetchVersion: true,
 	}
@@ -47,7 +49,7 @@ func TestGolang(t *testing.T) {
 	}{
 		{Case: "Go 1.15", ExpectedString: "1.15.8", Version: "go version go1.15.8 darwin/amd64"},
 		{Case: "Go 1.16", ExpectedString: "1.16", Version: "go version go1.16 darwin/amd64"},
-		{Case: "go.mod 1.20", ParseModFile: true, HasModFileInParentDir: true, ExpectedString: "1.20"},
+		{Case: "go.mod 1.21", ParseModFile: true, HasModFileInParentDir: true, ExpectedString: "1.21"},
 		{Case: "no go.mod file fallback", ParseModFile: true, ExpectedString: "1.16", Version: "go version go1.16 darwin/amd64"},
 		{
 			Case:                  "invalid go.mod file fallback",
