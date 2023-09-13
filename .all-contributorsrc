@@ -1651,7 +1651,9 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/54537427?v=4",
       "profile": "http://www.kemadev.fr/fr/",
       "contributions": [
-        "code"
+        "code",
+        "design",
+        "doc"
       ]
     },
     {
@@ -1869,6 +1871,53 @@
       "profile": "https://carlwa.com",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "ercpereda",
+      "name": "Ernesto R. C. Pereda",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13546685?v=4",
+      "profile": "https://github.com/ercpereda",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
+      ]
+    },
+    {
+      "login": "0Ky",
+      "name": "ｃｒｙｐｔｉｘ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16103757?v=4",
+      "profile": "https://github.com/0Ky",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "ehawman",
+      "name": "Evan Hawman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52979227?v=4",
+      "profile": "https://github.com/ehawman",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "ZerdoX-x",
+      "name": "Mark Lansky",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49815452?v=4",
+      "profile": "https://zerdox.dev",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "pulsation",
+      "name": "pulsation",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1838397?v=4",
+      "profile": "https://github.com/pulsation",
+      "contributions": [
+        "code"
       ]
     }
   ],
