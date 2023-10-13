@@ -190,7 +190,7 @@ type TemplateCache struct {
 	sync.RWMutex
 }
 
-func (t *TemplateCache) AddSegmentData(key string, value interface{}) {
+func (t *TemplateCache) AddSegmentData(key string, value any) {
 	t.Segments.Set(key, value)
 }
 
@@ -425,22 +425,36 @@ func (env *Shell) Pwd() string {
 
 func (env *Shell) HasFiles(pattern string) bool {
 	defer env.Trace(time.Now(), pattern)
+
 	cwd := env.Pwd()
 	fileSystem := os.DirFS(cwd)
-	matches, err := fs.Glob(fileSystem, pattern)
+
+	matches, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		env.Error(err)
 		env.Debug("false")
 		return false
 	}
+
+	pattern = strings.ToLower(pattern)
 	for _, match := range matches {
-		file, err := fs.Stat(fileSystem, match)
-		if err != nil || file.IsDir() {
+		if match.IsDir() {
 			continue
 		}
-		env.Debug("true")
-		return true
+
+		matchFileName, err := filepath.Match(pattern, strings.ToLower(match.Name()))
+		if err != nil {
+			env.Error(err)
+			env.Debug("false")
+			return false
+		}
+
+		if matchFileName {
+			env.Debug("true")
+			return true
+		}
 	}
+
 	env.Debug("false")
 	return false
 }
@@ -802,7 +816,7 @@ func (env *Shell) TemplateCache() *TemplateCache {
 	tmplCache.Segments = NewConcurrentMap()
 	tmplCache.PromptCount = env.CmdFlags.PromptCount
 	tmplCache.Env = make(map[string]string)
-	tmplCache.Var = make(map[string]interface{})
+	tmplCache.Var = make(map[string]any)
 
 	if env.Var != nil {
 		tmplCache.Var = env.Var
