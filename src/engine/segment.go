@@ -104,6 +104,8 @@ const (
 	AZFUNC SegmentType = "azfunc"
 	// BATTERY writes the battery percentage
 	BATTERY SegmentType = "battery"
+	// BAZEL writes the bazel version
+	BAZEL SegmentType = "bazel"
 	// Brewfather segment
 	BREWFATHER SegmentType = "brewfather"
 	// Buf segment writes the active buf version
@@ -166,6 +168,8 @@ const (
 	KOTLIN SegmentType = "kotlin"
 	// KUBECTL writes the Kubernetes context we're currently in
 	KUBECTL SegmentType = "kubectl"
+	// LASTFM writes the lastfm status
+	LASTFM SegmentType = "lastfm"
 	// LUA writes the active lua version
 	LUA SegmentType = "lua"
 	// MERCURIAL writes the Mercurial source control information
@@ -269,6 +273,7 @@ var Segments = map[SegmentType]func() SegmentWriter{
 	AZ:              func() SegmentWriter { return &segments.Az{} },
 	AZFUNC:          func() SegmentWriter { return &segments.AzFunc{} },
 	BATTERY:         func() SegmentWriter { return &segments.Battery{} },
+	BAZEL:           func() SegmentWriter { return &segments.Bazel{} },
 	BREWFATHER:      func() SegmentWriter { return &segments.Brewfather{} },
 	BUF:             func() SegmentWriter { return &segments.Buf{} },
 	CARBONINTENSITY: func() SegmentWriter { return &segments.CarbonIntensity{} },
@@ -300,6 +305,7 @@ var Segments = map[SegmentType]func() SegmentWriter{
 	JULIA:           func() SegmentWriter { return &segments.Julia{} },
 	KOTLIN:          func() SegmentWriter { return &segments.Kotlin{} },
 	KUBECTL:         func() SegmentWriter { return &segments.Kubectl{} },
+	LASTFM:          func() SegmentWriter { return &segments.LastFM{} },
 	LUA:             func() SegmentWriter { return &segments.Lua{} },
 	MERCURIAL:       func() SegmentWriter { return &segments.Mercurial{} },
 	NBA:             func() SegmentWriter { return &segments.Nba{} },

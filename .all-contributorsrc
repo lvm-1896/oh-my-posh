@@ -2075,7 +2075,7 @@
     },
     {
       "login": "mishmanners",
-      "name": "Michelle \"MishManners®™\" Mannering",
+      "name": "Michelle Mannering",
       "avatar_url": "https://avatars.githubusercontent.com/u/36594527?v=4",
       "profile": "http://mishmanners.info",
       "contributions": [
@@ -2118,6 +2118,28 @@
       "profile": "https://www.linkedin.com/in/thiagobarros95/",
       "contributions": [
         "design"
+      ]
+    },
+    {
+      "login": "TendTo",
+      "name": "Tend",
+      "avatar_url": "https://avatars.githubusercontent.com/u/65033249?v=4",
+      "profile": "https://github.com/TendTo",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
+      ]
+    },
+    {
+      "login": "KibbeWater",
+      "name": "Snow",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35224538?v=4",
+      "profile": "https://kibbewater.com",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
       ]
     }
   ],
