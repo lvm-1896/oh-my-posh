@@ -316,7 +316,7 @@ func escapeGlyphs(s string, migrate bool) string {
 		}
 
 		if migrate {
-			if val, OK := cp[int(r)]; OK {
+			if val, OK := cp[uint64(r)]; OK {
 				r = rune(val)
 			}
 		}
@@ -404,7 +404,7 @@ func defaultConfig(env platform.Environment, warning bool) *Config {
 						Template:        " \uf0e7 ",
 					},
 					{
-						Type:            EXIT,
+						Type:            STATUS,
 						Style:           Diamond,
 						LeadingDiamond:  "<transparent,background>\ue0b0</>",
 						TrailingDiamond: "\ue0b4",

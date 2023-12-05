@@ -2150,6 +2150,34 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "liudonghua123",
+      "name": "liudonghua",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2276718?v=4",
+      "profile": "http://blog.liudonghua.top",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Somoy73",
+      "name": "Somoy Subandhu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/40368688?v=4",
+      "profile": "http://somoy.me",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "oleksbabieiev",
+      "name": "Oleksandr Babieiev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/64398691?v=4",
+      "profile": "https://github.com/oleksbabieiev",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

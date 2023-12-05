@@ -5,18 +5,20 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development docusaurus start",
     "build": "docusaurus build",
+    "serve": "docusaurus serve",
     "themes": "node export_themes.js"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.3.1",
-    "@docusaurus/preset-classic": "^2.3.1",
-    "@docusaurus/theme-search-algolia": "^2.3.1",
+    "@docusaurus/core": "^3.0.0",
+    "@docusaurus/preset-classic": "^3.0.0",
+    "@docusaurus/theme-search-algolia": "^3.0.0",
     "@iarna/toml": "^2.2.5",
+    "@mdx-js/react": "^3.0.0",
     "classnames": "^2.3.2",
-    "query-string": "7.1.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "yaml": "^2.2.2"
+    "query-string": "8.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "yaml": "^2.3.4"
   },
   "resolutions": {
     "trim": "^0.0.3",
@@ -39,10 +41,10 @@
     ]
   },
   "engines": {
-    "npm": "8.9.0",
-    "node": "18.2.0"
+    "npm": "10.1.0",
+    "node": "20.9.0"
   },
   "volta": {
-    "node": "18.2.0"
+    "node": "20.9.0"
   }
 }
