@@ -1126,7 +1126,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/83997633?v=4",
       "profile": "https://bittu.eu.org",
       "contributions": [
-        "design"
+        "design",
+        "code"
       ]
     },
     {
@@ -2176,6 +2177,15 @@
       "profile": "https://github.com/oleksbabieiev",
       "contributions": [
         "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "mrbeardad",
+      "name": "Heache Bear",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54128430?v=4",
+      "profile": "https://github.com/mrbeardad",
+      "contributions": [
         "doc"
       ]
     }
