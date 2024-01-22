@@ -2224,6 +2224,44 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "RiikkaDream",
+      "name": "Riikka",
+      "avatar_url": "https://avatars.githubusercontent.com/u/56921531?v=4",
+      "profile": "https://www.linkedin.com/in/riikka-l-861694b2/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "srpmtt",
+      "name": "srpmtt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11175503?v=4",
+      "profile": "https://github.com/srpmtt",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
+      ]
+    },
+    {
+      "login": "Chris-Johnston",
+      "name": "Chris Johnston",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16418643?v=4",
+      "profile": "https://chris-johnston.me",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "Daimonion1980",
+      "name": "Thomas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12880413?v=4",
+      "profile": "https://github.com/Daimonion1980",
+      "contributions": [
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -20,7 +20,7 @@ To display all icons, we recommend the use of a [Nerd Font][fonts].
 When using oh-my-posh inside the WSL, make sure to follow the [Linux][linux] installation guide.
 :::
 
-<a href="pathname://ms-windows-store://pdp/?productid=XP8K0HKJFRXGCK" target="_blank">
+<a href="ms-windows-store://pdp/?productid=XP8K0HKJFRXGCK" target="_blank">
   <img
     src={require('/img/winstore.png').default}
     alt="Windows Store Link"
@@ -73,7 +73,15 @@ This installs a couple of things:
 - `oh-my-posh.exe` - Windows executable
 - `themes` - The latest Oh My Posh [themes][themes]
 
+:::info
 For the `PATH` to be reloaded, a restart of your terminal is advised.
+If oh-my-posh is not recognized as a command, you can run the installer again, or add it manually to your `PATH`.
+For example:
+
+```powershell
+$env:Path += ";C:\Users\user\AppData\Local\Programs\oh-my-posh\bin"
+```
+:::
 
 :::tip Antivirus software
 Due to frequent updates of Oh My Posh, Antivirus software occasionally flags it (false positive).
@@ -131,7 +139,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object
 ## Default themes
 
 You can find the themes in the folder indicated by the environment variable `POSH_THEMES_PATH`.
-For example, you can use `oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json"`
+For example, you can use `oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json" | Invoke-Expression`
 for the prompt initialization in PowerShell.
 
 

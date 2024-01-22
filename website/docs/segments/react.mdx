@@ -1,12 +1,12 @@
 ---
-id: angular
-title: Angular
-sidebar_label: Angular
+id: react
+title: React
+sidebar_label: React
 ---
 
 ## What
 
-Display the currently active [Angular CLI][angular-cli-docs] version.
+Display the currently active React version.
 
 ## Sample Configuration
 
@@ -14,12 +14,11 @@ import Config from "@site/src/components/Config.js";
 
 <Config
   data={{
-    type: "angular",
+    type: "react",
     style: "powerline",
     powerline_symbol: "\uE0B0",
-    foreground: "#000000",
-    background: "#1976d2",
-    template: " \uE753 {{ .Full }} ",
+    foreground: "#81a1c1",
+    template: " \uE7ba {{ .Full }} ",
   }}
 />
 
@@ -29,10 +28,10 @@ import Config from "@site/src/components/Config.js";
 | ---------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `home_enabled`         | `boolean`  | display the segment in the HOME folder or not - defaults to `false`                                                                                          |
 | `fetch_version`        | `boolean`  | fetch the active version or not; useful if all you need is an icon indicating `ng`                                                                           |
-| `display_mode`         | `string`   | <ul><li>`always`: the segment is always displayed</li><li>`files`: the segment is only displayed when `angular.json` file is present (**default**)</li></ul> |
+| `display_mode`         | `string`   | <ul><li>`always`: the segment is always displayed</li><li>`files`: the segment is only displayed when `package.json` file is present (**default**)</li></ul> |
 | `version_url_template` | `string`   | a go [text/template][go-text-template] [template][templates] that creates the URL of the version info / release notes                                        |
 | `extensions`           | `[]string` | allows to override the default list of file extensions to validate                                                                                           |
-| `folders`              | `[]string` | allows to override the list of folder names to validate                                                                                                     |
+| `folders`              | `[]string` | allows to override the list of folder names to validate                                                                                                      |
 | `cache_version`        | `boolean`  | cache the executable's version or not - defaults to `false`                                                                                                  |
 
 ## Template ([info][templates])
@@ -58,4 +57,4 @@ import Config from "@site/src/components/Config.js";
 
 [go-text-template]: https://golang.org/pkg/text/template/
 [templates]: /docs/configuration/templates
-[angular-cli-docs]: https://angular.io/cli
+[react]: https://react.dev/

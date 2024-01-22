@@ -286,6 +286,7 @@
             "node",
             "npm",
             "nx",
+            "ocaml",
             "os",
             "owm",
             "path",
@@ -298,6 +299,7 @@
             "ruby",
             "rust",
             "r",
+            "react",
             "sapling",
             "session",
             "sitecore",
@@ -2551,6 +2553,37 @@
           "if": {
             "properties": {
               "type": {
+                "const": "react"
+              }
+            }
+          },
+          "then": {
+            "title": "React Segment",
+            "description": "https://ohmyposh.dev/docs/segments/react",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "home_enabled": {
+                    "$ref": "#/definitions/home_enabled"
+                  },
+                  "fetch_version": {
+                    "$ref": "#/definitions/fetch_version"
+                  },
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  },
+                  "version_url_template": {
+                    "$ref": "#/definitions/version_url_template"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "nx"
               }
             }
@@ -2572,6 +2605,37 @@
                   },
                   "version_url_template": {
                     "$ref": "#/definitions/version_url_template"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ocaml"
+              }
+            }
+          },
+          "then": {
+            "title": "OCaml Segment",
+            "description": "https://ohmyposh.dev/docs/segments/ocaml",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "home_enabled": {
+                    "$ref": "#/definitions/home_enabled"
+                  },
+                  "fetch_version": {
+                    "$ref": "#/definitions/fetch_version"
+                  },
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  },
+                  "missing_command_text": {
+                    "$ref": "#/definitions/missing_command_text"
                   }
                 }
               }
