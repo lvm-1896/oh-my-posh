@@ -2271,6 +2271,64 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "lucascosti",
+      "name": "Lucas Costi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4434330?v=4",
+      "profile": "https://lucascosti.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "gergelyk",
+      "name": "Grzegorz Krasoń",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11185582?v=4",
+      "profile": "http://krason.dev/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rockyoung",
+      "name": "rockyoung",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1207971?v=4",
+      "profile": "https://github.com/rockyoung",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "shravanasati",
+      "name": "Shravan Asati",
+      "avatar_url": "https://avatars.githubusercontent.com/u/69118069?v=4",
+      "profile": "https://github.com/shravanasati",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "lzecca78",
+      "name": "Luca Zecca",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3881844?v=4",
+      "profile": "https://github.com/lzecca78",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
+      ]
+    },
+    {
+      "login": "jreilly-lukava",
+      "name": "Joshua Reilly",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30353736?v=4",
+      "profile": "https://github.com/jreilly-lukava",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

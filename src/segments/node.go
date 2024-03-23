@@ -32,7 +32,7 @@ func (n *Node) Init(props properties.Properties, env platform.Environment) {
 	n.language = language{
 		env:        env,
 		props:      props,
-		extensions: []string{"*.js", "*.ts", "package.json", ".nvmrc", "pnpm-workspace.yaml", ".pnpmfile.cjs", ".npmrc", ".vue"},
+		extensions: []string{"*.js", "*.ts", "package.json", ".nvmrc", "pnpm-workspace.yaml", ".pnpmfile.cjs", ".vue"},
 		commands: []*cmd{
 			{
 				executable: "node",
@@ -88,11 +88,11 @@ func (n *Node) matchesVersionFile() (string, bool) {
 		case "fermium":
 			fileVersion = "14.21.3"
 		case "gallium":
-			fileVersion = "16.20.1"
+			fileVersion = "16.20.2"
 		case "hydrogen":
-			fileVersion = "18.19.0"
+			fileVersion = "18.19.1"
 		case "iron":
-			fileVersion = "20.10.0"
+			fileVersion = "20.11.1"
 		}
 	}
 

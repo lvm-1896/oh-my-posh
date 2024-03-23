@@ -20,28 +20,28 @@ import (
 
 // Segment represent a single segment and it's configuration
 type Segment struct {
-	Type                SegmentType    `json:"type,omitempty"`
-	Tips                []string       `json:"tips,omitempty"`
-	Style               SegmentStyle   `json:"style,omitempty"`
-	PowerlineSymbol     string         `json:"powerline_symbol,omitempty"`
-	InvertPowerline     bool           `json:"invert_powerline,omitempty"`
-	Foreground          string         `json:"foreground,omitempty"`
-	ForegroundTemplates template.List  `json:"foreground_templates,omitempty"`
-	Background          string         `json:"background,omitempty"`
-	BackgroundTemplates template.List  `json:"background_templates,omitempty"`
-	LeadingDiamond      string         `json:"leading_diamond,omitempty"`
-	TrailingDiamond     string         `json:"trailing_diamond,omitempty"`
-	Template            string         `json:"template,omitempty"`
-	Templates           template.List  `json:"templates,omitempty"`
-	TemplatesLogic      template.Logic `json:"templates_logic,omitempty"`
-	Properties          properties.Map `json:"properties,omitempty"`
-	Interactive         bool           `json:"interactive,omitempty"`
-	Alias               string         `json:"alias,omitempty"`
-	MaxWidth            int            `json:"max_width,omitempty"`
-	MinWidth            int            `json:"min_width,omitempty"`
-	Filler              string         `json:"filler,omitempty"`
+	Type                SegmentType    `json:"type,omitempty" toml:"type,omitempty"`
+	Tips                []string       `json:"tips,omitempty" toml:"tips,omitempty"`
+	Style               SegmentStyle   `json:"style,omitempty" toml:"style,omitempty"`
+	PowerlineSymbol     string         `json:"powerline_symbol,omitempty" toml:"powerline_symbol,omitempty"`
+	InvertPowerline     bool           `json:"invert_powerline,omitempty" toml:"invert_powerline,omitempty"`
+	Foreground          string         `json:"foreground,omitempty" toml:"foreground,omitempty"`
+	ForegroundTemplates template.List  `json:"foreground_templates,omitempty" toml:"foreground_templates,omitempty"`
+	Background          string         `json:"background,omitempty" toml:"background,omitempty"`
+	BackgroundTemplates template.List  `json:"background_templates,omitempty" toml:"background_templates,omitempty"`
+	LeadingDiamond      string         `json:"leading_diamond,omitempty" toml:"leading_diamond,omitempty"`
+	TrailingDiamond     string         `json:"trailing_diamond,omitempty" toml:"trailing_diamond,omitempty"`
+	Template            string         `json:"template,omitempty" toml:"template,omitempty"`
+	Templates           template.List  `json:"templates,omitempty" toml:"templates,omitempty"`
+	TemplatesLogic      template.Logic `json:"templates_logic,omitempty" toml:"templates_logic,omitempty"`
+	Properties          properties.Map `json:"properties,omitempty" toml:"properties,omitempty"`
+	Interactive         bool           `json:"interactive,omitempty" toml:"interactive,omitempty"`
+	Alias               string         `json:"alias,omitempty" toml:"alias,omitempty"`
+	MaxWidth            int            `json:"max_width,omitempty" toml:"max_width,omitempty"`
+	MinWidth            int            `json:"min_width,omitempty" toml:"min_width,omitempty"`
+	Filler              string         `json:"filler,omitempty" toml:"filler,omitempty"`
 
-	Enabled bool `json:"-"`
+	Enabled bool `json:"-" toml:"-"`
 
 	colors     *ansi.Colors
 	env        platform.Environment
@@ -202,6 +202,8 @@ const (
 	PLASTIC SegmentType = "plastic"
 	// Project version
 	PROJECT SegmentType = "project"
+	// PULUMI writes the pulumi user, store and stack
+	PULUMI SegmentType = "pulumi"
 	// PYTHON writes the virtual env name
 	PYTHON SegmentType = "python"
 	// QUASAR writes the QUASAR version and context
@@ -326,6 +328,7 @@ var Segments = map[SegmentType]func() SegmentWriter{
 	PHP:             func() SegmentWriter { return &segments.Php{} },
 	PLASTIC:         func() SegmentWriter { return &segments.Plastic{} },
 	PROJECT:         func() SegmentWriter { return &segments.Project{} },
+	PULUMI:          func() SegmentWriter { return &segments.Pulumi{} },
 	PYTHON:          func() SegmentWriter { return &segments.Python{} },
 	QUASAR:          func() SegmentWriter { return &segments.Quasar{} },
 	R:               func() SegmentWriter { return &segments.R{} },
@@ -380,6 +383,14 @@ func (segment *Segment) shouldIncludeFolder() bool {
 func (segment *Segment) isPowerline() bool {
 	style := segment.style()
 	return style == Powerline || style == Accordion
+}
+
+func (segment *Segment) hasEmptyDiamondAtEnd() bool {
+	if segment.style() != Diamond {
+		return false
+	}
+
+	return len(segment.TrailingDiamond) == 0
 }
 
 func (segment *Segment) cwdIncluded() bool {
