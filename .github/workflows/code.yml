@@ -25,9 +25,9 @@ jobs:
         go-version: 1.21
         cache-dependency-path: src/go.sum
     - name: Checkout code
-      uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+      uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
     - name: Golang CI
-      uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804
+      uses: golangci/golangci-lint-action@82d40c283aeb1f2b6595839195e95c2d6a49081b
       with:
         working-directory: src
     - name: Unit Tests

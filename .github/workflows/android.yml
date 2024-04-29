@@ -9,7 +9,7 @@ jobs:
     container: ghcr.io/jandedobbeleer/golang-android-container:latest
     steps:
     - name: Checkout code 👋
-      uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+      uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
     - name: Build
       run: |
         VERSION=$(echo "${{ github.event.release.name }}" | cut -c2-)

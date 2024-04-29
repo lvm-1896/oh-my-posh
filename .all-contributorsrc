@@ -2336,7 +2336,67 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/56458442?v=4",
       "profile": "https://ivan-the-terrible.github.io/",
       "contributions": [
+        "design",
+        "doc",
+        "code"
+      ]
+    },
+    {
+      "login": "mountcount",
+      "name": "mountcount",
+      "avatar_url": "https://avatars.githubusercontent.com/u/166301065?v=4",
+      "profile": "https://github.com/mountcount",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "Bondrake",
+      "name": "Bondrake",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11696?v=4",
+      "profile": "https://github.com/Bondrake",
+      "contributions": [
+        "design",
+        "code"
+      ]
+    },
+    {
+      "login": "R00dRallec",
+      "name": "R00dRallec",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9081954?v=4",
+      "profile": "https://github.com/R00dRallec",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "publicfacingusername",
+      "name": "Justin Wolfington",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13956145?v=4",
+      "profile": "https://github.com/publicfacingusername",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jtracey93",
+      "name": "Jack Tracey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41163455?v=4",
+      "profile": "https://bio.link/jacktracey",
+      "contributions": [
         "design"
+      ]
+    },
+    {
+      "login": "MarkDaveny",
+      "name": "MarkDaveny",
+      "avatar_url": "https://avatars.githubusercontent.com/u/168091250?v=4",
+      "profile": "https://github.com/MarkDaveny",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
       ]
     }
   ],

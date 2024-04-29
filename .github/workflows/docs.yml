@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy
     steps:
-      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
         with:
           submodules: true
           persist-credentials: false
@@ -34,7 +34,7 @@ jobs:
         # Images are defined on every Kind release
         # See https://github.com/kubernetes-sigs/kind/releases
       - name: Create k8s v1.23 Kind Cluster
-        uses: helm/kind-action@99576bfa6ddf9a8e612d83b513da5a75875caced
+        uses: helm/kind-action@0025e74a8c7512023d06dc019c617aa3cf561fde
         with:
           node_image: kindest/node:v1.23.4@sha256:0e34f0d0fd448aa2f2819cfd74e99fe5793a6e4938b328f657c8e3f81ee0dfb9
           cluster_name: posh
@@ -44,7 +44,7 @@ jobs:
       - name: Set default Kubernetes namespace
         run: |
           kubectl config set-context posh --namespace demo
-      - uses: azure/login@8c334a195cbb38e46038007b304988d888bf676a
+      - uses: azure/login@6b2456866fc08b011acb422a92a4aa20e2c4de32
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Build oh-my-posh 🔧
