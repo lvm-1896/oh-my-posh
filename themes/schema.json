@@ -286,7 +286,7 @@
         "type": {
           "type": "string",
           "title": "Segment Type",
-          "description": "https://ohmyposh.dev/docs/configuration/segment#type",
+          "description": "https://ohmyposh.dev/docs/configuration/segment",
           "enum": [
             "az",
             "aws",
@@ -360,6 +360,7 @@
             "strava",
             "svn",
             "swift",
+            "talosctl",
             "time",
             "text",
             "terraform",
@@ -414,27 +415,27 @@
         },
         "templates": {
           "$ref": "#/definitions/templates",
-          "description": "https://ohmyposh.dev/docs/configuration/segment#templates"
+          "description": "https://ohmyposh.dev/docs/configuration/segment"
         },
         "templates_logic": {
           "type": "string",
           "title": "Templates Logic",
-          "description": "https://ohmyposh.dev/docs/configuration/segment#templates",
+          "description": "https://ohmyposh.dev/docs/configuration/segment",
           "enum": [
             "first_match",
             "join"
           ]
         },
-        "max_cols": {
+        "max_width": {
           "type": "integer",
           "title": "if the terminal width exceeds this value, the segment will be hidden",
-          "description": "https://ohmyposh.dev/docs/configuration/segment#max_cols",
+          "description": "https://ohmyposh.dev/docs/configuration/segment",
           "default": 0
         },
-        "min_cols": {
+        "min_width": {
           "type": "integer",
           "title": "if the terminal width is inferior than this value, the segment will be hidden",
-          "description": "https://ohmyposh.dev/docs/configuration/segment#min_cols",
+          "description": "https://ohmyposh.dev/docs/configuration/segment",
           "default": 0
         },
         "properties": {
@@ -476,13 +477,13 @@
         "interactive": {
           "type": "boolean",
           "title": "Allow the use of interactive prompt escape sequences",
-          "description": "https://ohmyposh.dev/docs/configuration/segment#interactive",
+          "description": "https://ohmyposh.dev/docs/configuration/segment",
           "default": false
         },
         "alias": {
           "type": "string",
           "title": "Give the segment an alias for use in templates",
-          "description": "https://ohmyposh.dev/docs/configuration/segment#alias",
+          "description": "https://ohmyposh.dev/docs/configuration/segment",
           "default": ""
         }
       },
@@ -2783,6 +2784,19 @@
           "if": {
             "properties": {
               "type": {
+                "const": "talosctl"
+              }
+            }
+          },
+          "then": {
+            "title": "Talosctl Segment",
+            "description": "https://ohmyposh.dev/docs/segments/talosctl"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "time"
               }
             }
@@ -4434,6 +4448,18 @@
       "title": "Enable OSC99/7/51",
       "description": "https://ohmyposh.dev/docs/configuration/general#general-settings",
       "default": ""
+    },
+    "disable_notice": {
+      "type": "boolean",
+      "title": "Disable Upgrade Notice",
+      "description": "https://ohmyposh.dev/docs/configuration/title#general-settings",
+      "default": false
+    },
+    "patch_pwsh_bleed": {
+      "type": "boolean",
+      "title": "Patch PowerShell Color Bleed",
+      "description": "https://ohmyposh.dev/docs/configuration/title#general-settings",
+      "default": false
     },
     "console_title_template": {
       "type": "string",
