@@ -55,6 +55,7 @@ var (
 	ShellIntegration  bool
 	RPrompt           bool
 	CursorPositioning bool
+	PromptMark        bool
 )
 
 func getExecutablePath(env platform.Environment) (string, error) {
@@ -210,7 +211,16 @@ func PrintInit(env platform.Environment) string {
 		if env.Flags().Manual {
 			return "false"
 		}
+
 		return strconv.FormatBool(setting)
+	}
+
+	promptMark := func() string {
+		if PromptMark {
+			return "iterm2_prompt_mark"
+		}
+
+		return ""
 	}
 
 	shell := env.Flags().Shell
@@ -280,6 +290,7 @@ func PrintInit(env platform.Environment) string {
 		"::CURSOR::", strconv.FormatBool(CursorPositioning),
 		"::UPGRADE::", strconv.FormatBool(hasNotice),
 		"::UPGRADENOTICE::", notice,
+		"::PROMPT_MARK::", promptMark(),
 	).Replace(script)
 }
 

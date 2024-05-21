@@ -132,6 +132,10 @@ func (e *Engine) isWarp() bool {
 	return e.Env.Getenv("TERM_PROGRAM") == "WarpTerminal"
 }
 
+func (e *Engine) isIterm() bool {
+	return e.Env.Getenv("TERM_PROGRAM") == "iTerm.app"
+}
+
 func (e *Engine) shouldFill(filler string, remaining, blockLength int) (string, bool) {
 	if len(filler) == 0 {
 		return "", false
@@ -220,14 +224,6 @@ func (e *Engine) renderBlock(block *Block, cancelNewline bool) bool {
 
 		if block.Alignment != Right {
 			return false
-		}
-
-		// in ZSH, RPROMPT is printed with a trailing space
-		// to ensure alignment, we need to print a space here
-		// see https://github.com/JanDeDobbeleer/oh-my-posh/issues/4327
-		if e.Env.Shell() == shell.ZSH {
-			text += " "
-			length++
 		}
 
 		space, OK := e.canWriteRightBlock(false)
