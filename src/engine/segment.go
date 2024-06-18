@@ -11,7 +11,6 @@ import (
 	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 	"github.com/jandedobbeleer/oh-my-posh/src/segments"
-	"github.com/jandedobbeleer/oh-my-posh/src/shell"
 	"github.com/jandedobbeleer/oh-my-posh/src/template"
 
 	c "golang.org/x/text/cases"
@@ -101,6 +100,8 @@ const (
 	AWS SegmentType = "aws"
 	// AZ writes the Azure subscription info we're currently in
 	AZ SegmentType = "az"
+	// AZD writes the Azure Developer CLI environment info we're current in
+	AZD SegmentType = "azd"
 	// AZFUNC writes current AZ func version
 	AZFUNC SegmentType = "azfunc"
 	// BATTERY writes the battery percentage
@@ -111,6 +112,8 @@ const (
 	BREWFATHER SegmentType = "brewfather"
 	// Buf segment writes the active buf version
 	BUF SegmentType = "buf"
+	// BUN writes the active bun version
+	BUN SegmentType = "bun"
 	// CARBONINTENSITY writes the actual and forecast carbon intensity in gCO2/kWh
 	CARBONINTENSITY SegmentType = "carbonintensity"
 	// cds (SAP CAP) version
@@ -201,6 +204,8 @@ const (
 	PHP SegmentType = "php"
 	// PLASTIC represents the plastic scm status and information
 	PLASTIC SegmentType = "plastic"
+	// pnpm version
+	PNPM SegmentType = "pnpm"
 	// Project version
 	PROJECT SegmentType = "project"
 	// PULUMI writes the pulumi user, store and stack
@@ -280,11 +285,13 @@ var Segments = map[SegmentType]func() SegmentWriter{
 	ARGOCD:          func() SegmentWriter { return &segments.Argocd{} },
 	AWS:             func() SegmentWriter { return &segments.Aws{} },
 	AZ:              func() SegmentWriter { return &segments.Az{} },
+	AZD:             func() SegmentWriter { return &segments.Azd{} },
 	AZFUNC:          func() SegmentWriter { return &segments.AzFunc{} },
 	BATTERY:         func() SegmentWriter { return &segments.Battery{} },
 	BAZEL:           func() SegmentWriter { return &segments.Bazel{} },
 	BREWFATHER:      func() SegmentWriter { return &segments.Brewfather{} },
 	BUF:             func() SegmentWriter { return &segments.Buf{} },
+	BUN:             func() SegmentWriter { return &segments.Bun{} },
 	CARBONINTENSITY: func() SegmentWriter { return &segments.CarbonIntensity{} },
 	CDS:             func() SegmentWriter { return &segments.Cds{} },
 	CF:              func() SegmentWriter { return &segments.Cf{} },
@@ -330,6 +337,7 @@ var Segments = map[SegmentType]func() SegmentWriter{
 	PERL:            func() SegmentWriter { return &segments.Perl{} },
 	PHP:             func() SegmentWriter { return &segments.Php{} },
 	PLASTIC:         func() SegmentWriter { return &segments.Plastic{} },
+	PNPM:            func() SegmentWriter { return &segments.Pnpm{} },
 	PROJECT:         func() SegmentWriter { return &segments.Project{} },
 	PULUMI:          func() SegmentWriter { return &segments.Pulumi{} },
 	PYTHON:          func() SegmentWriter { return &segments.Python{} },
@@ -371,7 +379,9 @@ func (segment *Segment) style() SegmentStyle {
 	if len(segment.styleCache) != 0 {
 		return segment.styleCache
 	}
+
 	segment.styleCache = segment.Style.Resolve(segment.env, segment.writer)
+
 	return segment.styleCache
 }
 
@@ -379,8 +389,10 @@ func (segment *Segment) shouldIncludeFolder() bool {
 	if segment.env == nil {
 		return true
 	}
+
 	cwdIncluded := segment.cwdIncluded()
 	cwdExcluded := segment.cwdExcluded()
+
 	return cwdIncluded && !cwdExcluded
 }
 
@@ -419,6 +431,7 @@ func (segment *Segment) cwdExcluded() bool {
 	if !ok {
 		value = segment.Properties[properties.IgnoreFolders]
 	}
+
 	list := properties.ParseStringArray(value)
 	return segment.env.DirMatchesOneOf(segment.env.Pwd(), list)
 }
@@ -429,6 +442,7 @@ func (segment *Segment) shouldInvokeWithTip(tip string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -436,9 +450,11 @@ func (segment *Segment) foreground() string {
 	if segment.colors == nil {
 		segment.colors = &ansi.Colors{}
 	}
+
 	if len(segment.colors.Foreground) == 0 {
 		segment.colors.Foreground = segment.ForegroundTemplates.FirstMatch(segment.writer, segment.env, segment.Foreground)
 	}
+
 	return segment.colors.Foreground
 }
 
@@ -446,9 +462,11 @@ func (segment *Segment) background() string {
 	if segment.colors == nil {
 		segment.colors = &ansi.Colors{}
 	}
+
 	if len(segment.colors.Background) == 0 {
 		segment.colors.Background = segment.BackgroundTemplates.FirstMatch(segment.writer, segment.env, segment.Background)
 	}
+
 	return segment.colors.Background
 }
 
@@ -481,19 +499,23 @@ func (segment *Segment) string() string {
 			return templatesResult
 		}
 	}
+
 	if len(segment.Template) == 0 {
 		segment.Template = segment.writer.Template()
 	}
+
 	tmpl := &template.Text{
 		Template:        segment.Template,
 		Context:         segment.writer,
 		Env:             segment.env,
 		TemplatesResult: templatesResult,
 	}
+
 	text, err := tmpl.Render()
 	if err != nil {
 		return err.Error()
 	}
+
 	return text
 }
 
@@ -501,10 +523,12 @@ func (segment *Segment) Name() string {
 	if len(segment.name) != 0 {
 		return segment.name
 	}
+
 	name := segment.Alias
 	if len(name) == 0 {
 		name = c.Title(language.English).String(string(segment.Type))
 	}
+
 	segment.name = name
 	return name
 }
@@ -562,20 +586,11 @@ func (segment *Segment) SetText() {
 	if !segment.Enabled {
 		return
 	}
+
 	segment.text = segment.string()
 	segment.Enabled = len(strings.ReplaceAll(segment.text, " ", "")) > 0
+
 	if !segment.Enabled {
 		segment.env.TemplateCache().RemoveSegmentData(segment.Name())
-	}
-
-	if segment.Interactive {
-		return
-	}
-	// we have to do this to prevent bash/zsh from misidentifying escape sequences
-	switch segment.env.Shell() {
-	case shell.BASH:
-		segment.text = strings.NewReplacer("`", "\\`", `\`, `\\`).Replace(segment.text)
-	case shell.ZSH:
-		segment.text = strings.NewReplacer("`", "\\`", `%`, `%%`).Replace(segment.text)
 	}
 }

@@ -3,6 +3,7 @@ package segments
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/jandedobbeleer/oh-my-posh/src/platform"
@@ -99,13 +100,11 @@ func (pt *Path) Enabled() bool {
 	if len(pt.pwd) == 0 {
 		return false
 	}
+
 	pt.setStyle()
 	pwd := pt.env.Pwd()
-	if pt.env.IsWsl() {
-		pt.Location, _ = pt.env.RunCommand("wslpath", "-m", pwd)
-	} else {
-		pt.Location = pwd
-	}
+
+	pt.Location = pt.env.TemplateCache().AbsolutePWD
 	pt.StackCount = pt.env.StackCount()
 	pt.Writable = pt.env.DirIsWritable(pwd)
 	return true
@@ -192,11 +191,38 @@ func (pt *Path) setStyle() {
 	case FolderType:
 		pt.Path = pt.getFolderPath()
 	case Powerlevel:
-		maxWidth := int(pt.props.GetFloat64(MaxWidth, 0))
+		maxWidth := pt.getMaxWidth()
 		pt.Path = pt.getUniqueLettersPath(maxWidth)
 	default:
 		pt.Path = fmt.Sprintf("Path style: %s is not available", style)
 	}
+}
+
+func (pt *Path) getMaxWidth() int {
+	width := pt.props.GetString(MaxWidth, "")
+	if len(width) == 0 {
+		return 0
+	}
+
+	tmpl := &template.Text{
+		Template: width,
+		Context:  pt,
+		Env:      pt.env,
+	}
+
+	text, err := tmpl.Render()
+	if err != nil {
+		pt.env.Error(err)
+		return 0
+	}
+
+	value, err := strconv.Atoi(text)
+	if err != nil {
+		pt.env.Error(err)
+		return 0
+	}
+
+	return value
 }
 
 func (pt *Path) getFolderSeparator() string {

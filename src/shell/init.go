@@ -56,6 +56,7 @@ var (
 	RPrompt           bool
 	CursorPositioning bool
 	PromptMark        bool
+	AutoUpgrade       bool
 )
 
 func getExecutablePath(env platform.Environment) (string, error) {
@@ -290,6 +291,7 @@ func PrintInit(env platform.Environment) string {
 		"::CURSOR::", strconv.FormatBool(CursorPositioning),
 		"::UPGRADE::", strconv.FormatBool(hasNotice),
 		"::UPGRADENOTICE::", notice,
+		"::AUTOUPGRADE::", strconv.FormatBool(AutoUpgrade),
 		"::PROMPT_MARK::", promptMark(),
 	).Replace(script)
 }

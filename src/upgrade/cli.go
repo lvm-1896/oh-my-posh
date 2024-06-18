@@ -12,12 +12,24 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/jandedobbeleer/oh-my-posh/src/build"
 	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 )
 
 var (
 	program   *tea.Program
-	textStyle = lipgloss.NewStyle().Margin(1, 0, 2, 4)
+	textStyle = lipgloss.NewStyle().Margin(1, 0, 2, 0)
+	title     string
+)
+
+const (
+	upgradeNotice = `
+A new release of Oh My Posh is available: %s → %s
+To upgrade, run: 'oh-my-posh upgrade'
+
+To enable automated upgrades, set 'auto_upgrade' to 'true' in your configuration.
+`
+	Supported = true
 )
 
 type resultMsg string
@@ -29,6 +41,10 @@ const (
 	downloading
 	installing
 )
+
+func setState(message state) {
+	program.Send(stateMsg(message))
+}
 
 type stateMsg state
 
@@ -88,7 +104,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *model) View() string {
 	if len(m.message) > 0 {
-		return textStyle.Render(m.message)
+		return title + textStyle.Render(m.message)
 	}
 
 	var message string
@@ -103,10 +119,20 @@ func (m *model) View() string {
 		message = "Installing"
 	}
 
-	return textStyle.Render(fmt.Sprintf("%s %s", m.spinner.View(), message))
+	return title + textStyle.Render(fmt.Sprintf("%s %s", m.spinner.View(), message))
 }
 
-func Run() {
+func Run(env platform.Environment) {
+	titleStyle := lipgloss.NewStyle().Margin(1, 0, 1, 0)
+	title = "📦  Upgrading Oh My Posh"
+
+	version, err := Latest(env)
+	if err == nil {
+		title = fmt.Sprintf("%s from %s to %s", title, build.Version, version)
+	}
+
+	title = titleStyle.Render(title)
+
 	program = tea.NewProgram(initialModel())
 	if _, err := program.Run(); err != nil {
 		fmt.Println(err)
@@ -128,7 +154,7 @@ func downloadAsset(asset string) (io.ReadCloser, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Failed to download installer: %s", url)
+		return nil, fmt.Errorf("failed to download installer: %s", url)
 	}
 
 	return resp.Body, nil

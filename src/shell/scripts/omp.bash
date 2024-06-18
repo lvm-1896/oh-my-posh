@@ -65,7 +65,7 @@ function _omp_hook() {
     set_poshcontext
     _set_posh_cursor_position
 
-    PS1="$(::OMP:: print primary --config="$POSH_THEME" --shell=bash --shell-version="$BASH_VERSION" --status="$ret" --pipestatus="${pipeStatus[*]}" --execution-time="$omp_elapsed" --stack-count="$omp_stack_count" --no-status="$no_exit_code" | tr -d '\0')"
+    PS1="$(::OMP:: print primary --config="$POSH_THEME" --shell=bash --shell-version="$BASH_VERSION" --status="$ret" --pipestatus="${pipeStatus[*]}" --execution-time="$omp_elapsed" --stack-count="$omp_stack_count" --no-status="$no_exit_code" --terminal-width="${COLUMNS-0}" | tr -d '\0')"
     return $ret
 }
 
@@ -75,4 +75,8 @@ fi
 
 if [ "::UPGRADE::" == "true" ]; then
     echo "::UPGRADENOTICE::"
+fi
+
+if [[ "::AUTOUPGRADE::" == "true" ]]; then
+    ::OMP:: upgrade
 fi

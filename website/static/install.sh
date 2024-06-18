@@ -1,11 +1,11 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 install_dir=""
 themes_dir=""
 executable=""
 
 error() {
-    printf "\x1b[31m$1\e[0m\n"
+    printf "\e[31m$1\e[0m\n"
     exit 1
 }
 
@@ -14,7 +14,7 @@ info() {
 }
 
 warn() {
-    printf "⚠️  \x1b[33m$1\e[0m\n"
+    printf "⚠️  \e[33m$1\e[0m\n"
 }
 
 help() {
@@ -22,7 +22,7 @@ help() {
     echo "Install script for Oh My Posh"
     echo
     echo "Syntax: install.sh [-h|d|t]"
-    echo "\noptions:"
+    echo "options:"
     echo "-h     Print this help."
     echo "-d     Specify the installation directory. Defaults to /usr/local/bin or the directory where oh-my-posh is installed."
     echo "-t     Specify the themes installation directory. Defaults to the oh-my-posh cache directory."
@@ -80,13 +80,14 @@ set_install_directory() {
 }
 
 validate_install_directory() {
+    #check if installation dir exists
     if [ ! -d "$install_dir" ]; then
         error "Directory ${install_dir} does not exist, set a different directory and try again."
     fi
-
-    # check if we can write to the install directory
-    if [ ! -w $install_dir ]; then
-        error "Cannot write to ${install_dir}. Please set a different directory and try again: \n  curl -s https://ohmyposh.dev/install.sh | bash -s -- -d {directory}"
+        
+    # Check if regular user has write permission
+    if [ ! -w "$install_dir" ]; then
+        error "Cannot write to ${install_dir}. Please check write permissions or set a different directory and try again: \ncurl -s https://ohmyposh.dev/install.sh | bash -s -- -d {directory}"
     fi
 
     # check if the directory is in the PATH
@@ -106,28 +107,15 @@ validate_install_directory() {
 }
 
 validate_themes_directory() {
-    if [ ! -d "$install_dir" ]; then
-        error "Directory ${install_dir} does not exist, set a different directory and try again."
+    
+    # Validate if the themes directory exists
+    if ! mkdir -p "$themes_dir" > /dev/null 2>&1; then
+        error "Cannot write to ${themes_dir}. Please check write permissions or set a different directory and try again: \ncurl -s https://ohmyposh.dev/install.sh | bash -s -- -t {directory}"
     fi
 
-    # check if we can write to the install directory
-    if [ ! -w $install_dir ]; then
-        error "Cannot write to ${install_dir}. Please set a different directory and try again: \n  curl -s https://ohmyposh.dev/install.sh | bash -s -- -d {directory}"
-    fi
-
-    # check if the directory is in the PATH
-    good=$(
-        IFS=:
-        for path in $PATH; do
-        if [ "${path%/}" = "${install_dir}" ]; then
-            printf 1
-            break
-        fi
-        done
-    )
-
-    if [ "${good}" != "1" ]; then
-        warn "Installation directory ${install_dir} is not in your \$PATH"
+    #check user write permission
+    if [ ! -w "$themes_dir" ]; then
+        error "Cannot write to ${themes_dir}. Please check write permissions or set a different directory and try again: \ncurl -s https://ohmyposh.dev/install.sh | bash -s -- -t {directory}"
     fi
 }
 
@@ -144,10 +132,7 @@ install_themes() {
         themes_dir="${cache_dir}/themes"
     fi
 
-    # Validate if the themes directory exists
-    if [ ! -d "$themes_dir" ]; then
-        mkdir -p $themes_dir
-    fi
+    validate_themes_directory
 
     info "🎨 Installing oh-my-posh themes in ${themes_dir}\n"
 
@@ -157,7 +142,7 @@ install_themes() {
 
     http_response=$(curl -s -f -L $url -o $zip_file -w "%{http_code}")
 
-    if [ $http_response == "200" ] && [ -f $zip_file ]; then
+    if [ $http_response = "200" ] && [ -f $zip_file ]; then
         unzip -o -q $zip_file -d $themes_dir
         # make sure the files are readable and writable for all users
         chmod a+rwX ${themes_dir}/*.omp.*
@@ -205,9 +190,9 @@ install() {
 
     info "🚀 Installation complete.\n\nYou can follow the instructions at https://ohmyposh.dev/docs/installation/prompt"
     info "to setup your shell to use oh-my-posh."
-    if [ $http_response == "200" ]; then
-        info "\nIf you want to use a built-in theme, you can find them in the ${theme_dir} directory:"
-        info "  oh-my-posh init {shell} --config ${theme_dir}/{theme}.omp.json\n"
+    if [ $http_response = "200" ]; then
+        info "\nIf you want to use a built-in theme, you can find them in the ${themes_dir} directory:"
+        info "  oh-my-posh init {shell} --config ${themes_dir}/{theme}.omp.json\n"
     fi
 }
 

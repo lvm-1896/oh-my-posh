@@ -2467,6 +2467,78 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "Joxtacy",
+      "name": "Jesper Hasselquist",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10127673?v=4",
+      "profile": "https://github.com/Joxtacy",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
+      ]
+    },
+    {
+      "login": "aaronpowell",
+      "name": "Aaron Powell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/434140?v=4",
+      "profile": "https://www.aaron-powell.com",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
+      ]
+    },
+    {
+      "login": "Dartypier",
+      "name": "Jacopo Zecchi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22201626?v=4",
+      "profile": "https://github.com/Dartypier",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "rose-m",
+      "name": "Michael Rose",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4354632?v=4",
+      "profile": "https://github.com/rose-m",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "denehoffman",
+      "name": "Nathaniel D. Hoffman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36977879?v=4",
+      "profile": "http://denehoffman.com",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "michaelschwobe",
+      "name": "Michael Schwobe",
+      "avatar_url": "https://avatars.githubusercontent.com/u/926242?v=4",
+      "profile": "https://schwobe.dev",
+      "contributions": [
+        "code",
+        "design",
+        "doc"
+      ]
+    },
+    {
+      "login": "Nibodhika",
+      "name": "Nibodhika",
+      "avatar_url": "https://avatars.githubusercontent.com/u/729967?v=4",
+      "profile": "https://github.com/Nibodhika",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
