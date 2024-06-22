@@ -262,6 +262,18 @@
           "description": "https://ohmyposh.dev/docs/configuration/block#newline",
           "default": false
         },
+        "leading_diamond": {
+          "type": "string",
+          "title": "Leading diamond",
+          "description": "https://ohmyposh.dev/docs/configuration/block#leading-diamond",
+          "default": ""
+        },
+        "trailing_diamond": {
+          "type": "string",
+          "title": "Trailing diamond",
+          "description": "https://ohmyposh.dev/docs/configuration/block#trailing-diamond",
+          "default": ""
+        },
         "segments": {
           "type": "array",
           "title": "Segments list, prompt elements to display based on context",
@@ -375,6 +387,7 @@
             "winreg",
             "withings",
             "xmake",
+            "yarn",
             "ytm"
           ]
         },
@@ -2544,6 +2557,12 @@
                     "title": "The format to use on a git root directory",
                     "description": "Golang string format to apply to the .git folder",
                     "default": ""
+                  },
+                  "display_cygpath": {
+                    "type": "boolean",
+                    "title": "Display the Cygwin (Linux) style path",
+                    "description": "Display the Cygwin (Linux) style path using cygpath -u $PWD.",
+                    "default": false
                   }
                 }
               }
@@ -4639,6 +4658,55 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "yarn"
+              }
+            }
+          },
+          "then": {
+            "title": "Yarn Segment",
+            "description": "https://ohmyposh.dev/docs/segments/yarn",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "home_enabled": {
+                    "$ref": "#/definitions/home_enabled"
+                  },
+                  "fetch_version": {
+                    "$ref": "#/definitions/fetch_version"
+                  },
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  },
+                  "missing_command_text": {
+                    "$ref": "#/definitions/missing_command_text"
+                  },
+                  "version_url_template": {
+                    "$ref": "#/definitions/version_url_template"
+                  },
+                  "cache_version": {
+                    "$ref": "#/definitions/cache_version"
+                  },
+                  "extensions": {
+                    "type": "array",
+                    "title": "Extensions",
+                    "description": "The extensions to look for when determining if a folder is an Yarn workspace",
+                    "default": ["package.json", "yarn.lock"],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "folders": {
+                    "$ref": "#/definitions/folders"
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     }
@@ -4673,6 +4741,12 @@
     "disable_notice": {
       "type": "boolean",
       "title": "Disable Upgrade Notice",
+      "description": "https://ohmyposh.dev/docs/configuration/title#general-settings",
+      "default": false
+    },
+    "auto_upgrade": {
+      "type": "boolean",
+      "title": "Enable automatic upgrades for Oh My Posh (supports Windows/macOS only)",
       "description": "https://ohmyposh.dev/docs/configuration/title#general-settings",
       "default": false
     },
