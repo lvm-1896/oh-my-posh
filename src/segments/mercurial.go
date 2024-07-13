@@ -3,7 +3,7 @@ package segments
 import (
 	"strings"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 )
 
 const (
@@ -67,7 +67,7 @@ func (hg *Mercurial) shouldDisplay() bool {
 		return false
 	}
 
-	hgdir, err := hg.env.HasParentFilePath(".hg")
+	hgdir, err := hg.env.HasParentFilePath(".hg", false)
 	if err != nil {
 		return false
 	}
@@ -86,8 +86,8 @@ func (hg *Mercurial) shouldDisplay() bool {
 }
 
 func (hg *Mercurial) setDir(dir string) {
-	dir = platform.ReplaceHomeDirPrefixWithTilde(hg.env, dir) // align with template PWD
-	if hg.env.GOOS() == platform.WINDOWS {
+	dir = runtime.ReplaceHomeDirPrefixWithTilde(hg.env, dir) // align with template PWD
+	if hg.env.GOOS() == runtime.WINDOWS {
 		hg.Dir = strings.TrimSuffix(dir, `\.hg`)
 		return
 	}

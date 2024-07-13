@@ -3,15 +3,15 @@ package segments
 import (
 	"testing"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/mock"
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime/mock"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSvnEnabledToolNotFound(t *testing.T) {
-	env := new(mock.MockedEnvironment)
+	env := new(mock.Environment)
 	env.On("InWSLSharedDrive").Return(false)
 	env.On("HasCommand", "svn").Return(false)
 	env.On("GOOS").Return("")
@@ -26,12 +26,12 @@ func TestSvnEnabledToolNotFound(t *testing.T) {
 }
 
 func TestSvnEnabledInWorkingDirectory(t *testing.T) {
-	fileInfo := &platform.FileInfo{
+	fileInfo := &runtime.FileInfo{
 		Path:         "/dir/hello",
 		ParentFolder: "/dir",
 		IsDir:        true,
 	}
-	env := new(mock.MockedEnvironment)
+	env := new(mock.Environment)
 	env.On("InWSLSharedDrive").Return(false)
 	env.On("HasCommand", "svn").Return(true)
 	env.On("GOOS").Return("")
@@ -40,7 +40,7 @@ func TestSvnEnabledInWorkingDirectory(t *testing.T) {
 	env.On("RunCommand", "svn", []string{"info", "/dir/hello", "--show-item", "revision"}).Return("", nil)
 	env.On("RunCommand", "svn", []string{"info", "/dir/hello", "--show-item", "relative-url"}).Return("", nil)
 	env.On("IsWsl").Return(false)
-	env.On("HasParentFilePath", ".svn").Return(fileInfo, nil)
+	env.On("HasParentFilePath", ".svn", false).Return(fileInfo, nil)
 	s := &Svn{
 		scm: scm{
 			env:   env,
@@ -157,7 +157,7 @@ func TestSvnTemplateString(t *testing.T) {
 		props := properties.Map{
 			FetchStatus: true,
 		}
-		env := new(mock.MockedEnvironment)
+		env := new(mock.Environment)
 		tc.Svn.env = env
 		tc.Svn.props = props
 		assert.Equal(t, tc.Expected, renderTemplate(env, tc.Template, tc.Svn), tc.Case)
@@ -225,19 +225,19 @@ R       Moved.File`,
 		},
 	}
 	for _, tc := range cases {
-		fileInfo := &platform.FileInfo{
+		fileInfo := &runtime.FileInfo{
 			Path:         "/dir/hello",
 			ParentFolder: "/dir",
 			IsDir:        true,
 		}
-		env := new(mock.MockedEnvironment)
+		env := new(mock.Environment)
 		env.On("InWSLSharedDrive").Return(false)
 		env.On("IsWsl").Return(false)
 		env.On("HasCommand", "svn").Return(true)
 		env.On("GOOS").Return("")
 		env.On("FileContent", "/dir/hello/trunk").Return("")
 		env.MockSvnCommand(fileInfo.Path, "", "info", "--tags", "--exact-match")
-		env.On("HasParentFilePath", ".svn").Return(fileInfo, nil)
+		env.On("HasParentFilePath", ".svn", false).Return(fileInfo, nil)
 		env.On("RunCommand", "svn", []string{"info", "", "--show-item", "revision"}).Return(tc.RefOutput, nil)
 		env.On("RunCommand", "svn", []string{"info", "", "--show-item", "relative-url"}).Return(tc.BranchOutput, nil)
 		env.On("RunCommand", "svn", []string{"status", ""}).Return(tc.StatusOutput, nil)
@@ -291,7 +291,7 @@ func TestRepo(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		env := new(mock.MockedEnvironment)
+		env := new(mock.Environment)
 		env.On("RunCommand", "svn", []string{"info", "", "--show-item", "repos-root-url"}).Return(tc.Repo, nil)
 		s := &Svn{
 			scm: scm{

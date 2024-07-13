@@ -7,8 +7,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/cache"
 	"github.com/jandedobbeleer/oh-my-posh/src/regex"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 )
 
 const (
@@ -45,14 +46,14 @@ var (
 type Text struct {
 	Template        string
 	Context         any
-	Env             platform.Environment
+	Env             runtime.Environment
 	TemplatesResult string
 }
 
 type Data any
 
 type Context struct {
-	*platform.TemplateCache
+	*cache.Template
 
 	// Simple container to hold ANY object
 	Data
@@ -62,8 +63,8 @@ type Context struct {
 func (c *Context) init(t *Text) {
 	c.Data = t.Context
 	c.Templates = t.TemplatesResult
-	if cache := t.Env.TemplateCache(); cache != nil {
-		c.TemplateCache = cache
+	if tmplCache := t.Env.TemplateCache(); tmplCache != nil {
+		c.Template = tmplCache
 		return
 	}
 }
@@ -178,7 +179,7 @@ func (t *Text) cleanTemplate() {
 				// as we can't provide a clean way to access the list
 				// of segments, we need to replace the property with
 				// the list of segments so they can be accessed directly
-				property = strings.Replace(property, ".Segments", ".Segments.SimpleMap", 1)
+				property = strings.Replace(property, ".Segments", ".Segments.ToSimple", 1)
 				result += property
 			} else {
 				// check if we have the same property in Data

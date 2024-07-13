@@ -1,8 +1,8 @@
 package segments
 
 import (
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 )
 
 type Haskell struct {
@@ -19,7 +19,7 @@ func (h *Haskell) Template() string {
 	return languageTemplate
 }
 
-func (h *Haskell) Init(props properties.Properties, env platform.Environment) {
+func (h *Haskell) Init(props properties.Properties, env runtime.Environment) {
 	ghcRegex := `(?P<version>((?P<major>[0-9]+).(?P<minor>[0-9]+).(?P<patch>[0-9]+)))`
 	ghcCmd := &cmd{
 		executable: "ghc",
@@ -46,7 +46,7 @@ func (h *Haskell) Init(props properties.Properties, env platform.Environment) {
 		h.language.commands = []*cmd{stackGhcCmd}
 		h.StackGhc = true
 	case "package":
-		_, err := h.language.env.HasParentFilePath("stack.yaml")
+		_, err := h.language.env.HasParentFilePath("stack.yaml", false)
 		if err == nil {
 			h.language.commands = []*cmd{stackGhcCmd}
 			h.StackGhc = true

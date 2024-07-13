@@ -3,14 +3,14 @@ package segments
 import (
 	"testing"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/mock"
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime/mock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMercurialEnabledToolNotFound(t *testing.T) {
-	env := new(mock.MockedEnvironment)
+	env := new(mock.Environment)
 	env.On("InWSLSharedDrive").Return(false)
 	env.On("HasCommand", "hg").Return(false)
 	env.On("GOOS").Return("")
@@ -27,17 +27,17 @@ func TestMercurialEnabledToolNotFound(t *testing.T) {
 }
 
 func TestMercurialEnabledInWorkingDirectory(t *testing.T) {
-	fileInfo := &platform.FileInfo{
+	fileInfo := &runtime.FileInfo{
 		Path:         "/dir/hello",
 		ParentFolder: "/dir",
 		IsDir:        true,
 	}
-	env := new(mock.MockedEnvironment)
+	env := new(mock.Environment)
 	env.On("InWSLSharedDrive").Return(false)
 	env.On("HasCommand", "hg").Return(true)
 	env.On("GOOS").Return("")
 	env.On("IsWsl").Return(false)
-	env.On("HasParentFilePath", ".hg").Return(fileInfo, nil)
+	env.On("HasParentFilePath", ".hg", false).Return(fileInfo, nil)
 	env.On("PathSeparator").Return("/")
 	env.On("Home").Return(poshHome)
 	env.On("Getenv", poshGitEnv).Return("")
@@ -137,7 +137,7 @@ A Added.File
 	}
 
 	for _, tc := range cases {
-		fileInfo := &platform.FileInfo{
+		fileInfo := &runtime.FileInfo{
 			Path:         "/dir/hello",
 			ParentFolder: "/dir",
 			IsDir:        true,
@@ -146,12 +146,12 @@ A Added.File
 			FetchStatus: true,
 		}
 
-		env := new(mock.MockedEnvironment)
+		env := new(mock.Environment)
 		env.On("InWSLSharedDrive").Return(false)
 		env.On("HasCommand", "hg").Return(true)
 		env.On("GOOS").Return("")
 		env.On("IsWsl").Return(false)
-		env.On("HasParentFilePath", ".hg").Return(fileInfo, nil)
+		env.On("HasParentFilePath", ".hg", false).Return(fileInfo, nil)
 		env.On("PathSeparator").Return("/")
 		env.On("Home").Return(poshHome)
 		env.On("Getenv", poshGitEnv).Return("")

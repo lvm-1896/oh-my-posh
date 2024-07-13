@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 )
 
 type Umbraco struct {
 	props properties.Properties
-	env   platform.Environment
+	env   runtime.Environment
 
 	Modern  bool
 	Version string
@@ -37,7 +37,7 @@ func (u *Umbraco) Enabled() bool {
 	// Check if we have a folder called Umbraco or umbraco in the current directory or a parent directory
 	folders := []string{"umbraco", "Umbraco"}
 	for _, folder := range folders {
-		if file, err := u.env.HasParentFilePath(folder); err == nil {
+		if file, err := u.env.HasParentFilePath(folder, false); err == nil {
 			location = file.ParentFolder
 			break
 		}
@@ -86,7 +86,7 @@ func (u *Umbraco) Template() string {
 	return "{{.Version}} "
 }
 
-func (u *Umbraco) Init(props properties.Properties, env platform.Environment) {
+func (u *Umbraco) Init(props properties.Properties, env runtime.Environment) {
 	u.props = props
 	u.env = env
 }

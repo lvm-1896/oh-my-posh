@@ -39,12 +39,18 @@ builds:
         goarch: arm
     hooks:
       post:
-      - sh -c "cosign sign-blob --key $COSIGN_KEY_LOCATION {{ .Path }} > dist/{{ .Name }}.sig"
+        - pwsh -c "if ('{{ .Path }}'.EndsWith('.exe')) { & '{{ .Env.SIGNTOOL }}' sign /f '{{ .Env.SIGNING_CERTIFICATE_LOCATION }}' /p '{{ .Env.SIGNING_CERTIFICATE_PASSWORD }}' /fd SHA256 /t http://timestamp.digicert.com '{{ .Path }}' }"
 archives:
   - id: oh-my-posh
     format: binary
     name_template: "posh-{{ .Os }}-{{ .Arch }}"
 checksum:
   name_template: 'checksums.txt'
+signs:
+  - cmd: pwsh
+    args:
+      - "-c"
+      - "& '{{ .Env.OPENSSL }}' pkeyutl -sign -inkey '{{ .Env.SHA_SIGNING_KEY_LOCATION }}' -out '${artifact}.sig' -rawin -in '${artifact}'"
+    artifacts: checksum
 changelog:
   disable: true

@@ -2557,6 +2557,70 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "aramikuto",
+      "name": "Aleksandr Kondrashov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/116561995?v=4",
+      "profile": "https://github.com/aramikuto",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "kimsey0",
+      "name": "Jacob Bundgaard",
+      "avatar_url": "https://avatars.githubusercontent.com/u/984760?v=4",
+      "profile": "https://jacobbundgaard.dk",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "ThisaruGuruge",
+      "name": "Thisaru Guruge",
+      "avatar_url": "https://avatars.githubusercontent.com/u/40016057?v=4",
+      "profile": "https://thisaru.me",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "edwin-shdw",
+      "name": "Edwin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62764562?v=4",
+      "profile": "https://github.com/edwin-shdw",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "jcdickinson",
+      "name": "Jonathan Dickinson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/522465?v=4",
+      "profile": "https://dickinson.id",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "po1o",
+      "name": "Polo-François Poli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5702825?v=4",
+      "profile": "https://github.com/po1o",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "EDIflyer",
+      "name": "EDIflyer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13610277?v=4",
+      "profile": "https://github.com/EDIflyer",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

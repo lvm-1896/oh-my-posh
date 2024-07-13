@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 )
 
 type Az struct {
 	props properties.Properties
-	env   platform.Environment
+	env   runtime.Environment
 
 	AzureSubscription
 	Origin string
@@ -33,15 +33,16 @@ type AzureConfig struct {
 }
 
 type AzureSubscription struct {
-	ID               string     `json:"id"`
-	Name             string     `json:"name"`
-	State            string     `json:"state"`
-	User             *AzureUser `json:"user"`
-	IsDefault        bool       `json:"isDefault"`
-	TenantID         string     `json:"tenantId"`
-	EnvironmentName  string     `json:"environmentName"`
-	HomeTenantID     string     `json:"homeTenantId"`
-	ManagedByTenants []any      `json:"managedByTenants"`
+	ID                string     `json:"id"`
+	Name              string     `json:"name"`
+	State             string     `json:"state"`
+	User              *AzureUser `json:"user"`
+	IsDefault         bool       `json:"isDefault"`
+	TenantID          string     `json:"tenantId"`
+	TenantDisplayName string     `json:"tenantDisplayName"`
+	EnvironmentName   string     `json:"environmentName"`
+	HomeTenantID      string     `json:"homeTenantId"`
+	ManagedByTenants  []any      `json:"managedByTenants"`
 }
 
 type AzureUser struct {
@@ -66,7 +67,8 @@ type AzurePowerShellSubscription struct {
 		} `json:"ExtendedProperties"`
 	} `json:"Subscription"`
 	Tenant struct {
-		ID string `json:"Id"`
+		ID   string `json:"Id"`
+		Name string `json:"Name"`
 	} `json:"Tenant"`
 }
 
@@ -74,7 +76,7 @@ func (a *Az) Template() string {
 	return NameTemplate
 }
 
-func (a *Az) Init(props properties.Properties, env platform.Environment) {
+func (a *Az) Init(props properties.Properties, env runtime.Environment) {
 	a.props = props
 	a.env = env
 }
@@ -126,10 +128,12 @@ func (a *Az) getModuleSubscription() bool {
 	if len(envSubscription) == 0 {
 		return false
 	}
+
 	var config AzurePowerShellSubscription
 	if err := json.Unmarshal([]byte(envSubscription), &config); err != nil {
 		return false
 	}
+
 	a.IsDefault = true
 	a.EnvironmentName = config.Environment.Name
 	a.TenantID = config.Tenant.ID
@@ -140,7 +144,10 @@ func (a *Az) getModuleSubscription() bool {
 		Name: config.Subscription.ExtendedProperties.Account,
 		Type: config.Account.Type,
 	}
+	a.TenantDisplayName = config.Tenant.Name
+
 	a.Origin = "PWSH"
+
 	return true
 }
 

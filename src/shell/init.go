@@ -9,7 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
+	"github.com/jandedobbeleer/oh-my-posh/src/color"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 	"github.com/jandedobbeleer/oh-my-posh/src/template"
 	"github.com/jandedobbeleer/oh-my-posh/src/upgrade"
 )
@@ -59,18 +60,18 @@ var (
 	AutoUpgrade       bool
 )
 
-func getExecutablePath(env platform.Environment) (string, error) {
+func getExecutablePath(env runtime.Environment) (string, error) {
 	executable, err := os.Executable()
 	if err != nil {
 		return "", err
 	}
 	if env.Flags().Strict {
-		return platform.Base(env, executable), nil
+		return runtime.Base(env, executable), nil
 	}
 	// On Windows, it fails when the excutable is called in MSYS2 for example
 	// which uses unix style paths to resolve the executable's location.
 	// PowerShell knows how to resolve both, so we can swap this without any issue.
-	if env.GOOS() == platform.WINDOWS {
+	if env.GOOS() == runtime.WINDOWS {
 		executable = strings.ReplaceAll(executable, "\\", "/")
 	}
 	return executable, nil
@@ -84,6 +85,7 @@ func quotePosixStr(str string) string {
 	if len(str) == 0 {
 		return "''"
 	}
+
 	needQuoting := false
 	var b strings.Builder
 	for _, r := range str {
@@ -166,21 +168,25 @@ func quoteNuStr(str string) string {
 	return fmt.Sprintf(`"%s"`, strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(str))
 }
 
-func Init(env platform.Environment) string {
+func Init(env runtime.Environment) string {
 	shell := env.Flags().Shell
+
 	switch shell {
 	case PWSH, PWSH5, ELVISH:
 		executable, err := getExecutablePath(env)
 		if err != nil {
 			return noExe
 		}
+
 		var additionalParams string
 		if env.Flags().Strict {
 			additionalParams += " --strict"
 		}
+
 		if env.Flags().Manual {
 			additionalParams += " --manual"
 		}
+
 		var command, config string
 		switch shell {
 		case PWSH, PWSH5:
@@ -191,6 +197,7 @@ func Init(env platform.Environment) string {
 			command = "eval (%s init %s --config=%s --print%s | slurp)"
 			config = env.Flags().Config
 		}
+
 		return fmt.Sprintf(command, executable, shell, config, additionalParams)
 	case ZSH, BASH, FISH, CMD, TCSH, XONSH, YASH:
 		return PrintInit(env)
@@ -202,7 +209,7 @@ func Init(env platform.Environment) string {
 	}
 }
 
-func PrintInit(env platform.Environment) string {
+func PrintInit(env runtime.Environment) string {
 	executable, err := getExecutablePath(env)
 	if err != nil {
 		return noExe
@@ -296,7 +303,7 @@ func PrintInit(env platform.Environment) string {
 	).Replace(script)
 }
 
-func createNuInit(env platform.Environment) {
+func createNuInit(env runtime.Environment) {
 	initPath := filepath.Join(env.Home(), ".oh-my-posh.nu")
 	f, err := os.OpenFile(initPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
@@ -309,18 +316,21 @@ func createNuInit(env platform.Environment) {
 	_ = f.Close()
 }
 
-func ConsoleBackgroundColor(env platform.Environment, backgroundColorTemplate string) string {
-	if len(backgroundColorTemplate) == 0 {
+func ConsoleBackgroundColor(env runtime.Environment, backgroundColorTemplate color.Ansi) color.Ansi {
+	if backgroundColorTemplate.IsEmpty() {
 		return backgroundColorTemplate
 	}
+
 	tmpl := &template.Text{
-		Template: backgroundColorTemplate,
+		Template: string(backgroundColorTemplate),
 		Context:  nil,
 		Env:      env,
 	}
+
 	text, err := tmpl.Render()
 	if err != nil {
-		return err.Error()
+		return color.Transparent
 	}
-	return text
+
+	return color.Ansi(text)
 }

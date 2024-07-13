@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
 	"github.com/jandedobbeleer/oh-my-posh/src/regex"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 )
 
 type PlasticStatus struct {
@@ -38,7 +38,7 @@ type Plastic struct {
 	plasticWorkspaceFolder string // root folder of workspace
 }
 
-func (p *Plastic) Init(props properties.Properties, env platform.Environment) {
+func (p *Plastic) Init(props properties.Properties, env runtime.Environment) {
 	p.props = props
 	p.env = env
 }
@@ -51,13 +51,16 @@ func (p *Plastic) Enabled() bool {
 	if !p.env.HasCommand("cm") {
 		return false
 	}
-	wkdir, err := p.env.HasParentFilePath(".plastic")
+
+	wkdir, err := p.env.HasParentFilePath(".plastic", false)
 	if err != nil {
 		return false
 	}
+
 	if p.shouldIgnoreRootRepository(wkdir.ParentFolder) {
 		return false
 	}
+
 	if !wkdir.IsDir {
 		return false
 	}
