@@ -4,11 +4,10 @@ import (
 	// "bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil" //nolint:staticcheck,nolintlint
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 
-	 "os"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -89,7 +88,7 @@ type sensor struct {
 
 type Sensors struct {
 	props properties.Properties
-	env   platform.Environment
+	env   runtime.Environment
 
 	FanIcon     string
 	TempIcon    string
@@ -111,7 +110,7 @@ var ErrNotFound = fmt.Errorf("Not found")
 var NoHWMonitorsError = fmt.Errorf("Hardware Monitor not found")
 
 func readFloat(path, filename string) (float64, error) {
-	str, err := ioutil.ReadFile(filepath.Join(path, filename))
+	str, err := os.ReadFile(filepath.Join(path, filename))
 	if err != nil {
 		return 0, err
 	}
@@ -126,7 +125,7 @@ func readFloat(path, filename string) (float64, error) {
 }
 
 func readInt(path, filename string) (int64, error) {
-	str, err := ioutil.ReadFile(filepath.Join(path, filename))
+	str, err := os.ReadFile(filepath.Join(path, filename))
 	if err != nil {
 		return 0, err
 	}
@@ -140,12 +139,12 @@ func readInt(path, filename string) (int64, error) {
 	return num, err
 }
 func getMonitorName(path string) (name string, err error) {
-	nameBytes, err := ioutil.ReadFile(filepath.Join(path, "name"))
+	nameBytes, err := os.ReadFile(filepath.Join(path, "name"))
 	return string(nameBytes[:len(nameBytes)-1]), err
 }
 
 func getHWMonitorFiles() (map[string]string, error) {
-	files, err := ioutil.ReadDir(sysfs)
+	files, err := os.ReadDir(sysfs)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +274,7 @@ func (e *Sensors) Enabled() bool {
 	return true
 }
 
-func (e *Sensors) Init(props properties.Properties, env platform.Environment) {
+func (e *Sensors) Init(props properties.Properties, env runtime.Environment) {
 	e.props = props
 	e.env = env
 }

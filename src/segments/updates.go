@@ -3,15 +3,15 @@ package segments
 import (
 	"bufio"
 	"fmt"
-	"github.com/jandedobbeleer/oh-my-posh/src/platform"
 	"github.com/jandedobbeleer/oh-my-posh/src/properties"
+	"github.com/jandedobbeleer/oh-my-posh/src/runtime"
 	"os"
 	"strconv"
 )
 
 type Updates struct {
 	props properties.Properties
-	env   platform.Environment
+	env   runtime.Environment
 
 	RebootIcon       string
 	UpdatesIcon      string
@@ -66,7 +66,7 @@ func (e *Updates) Enabled() bool {
 	return true
 }
 
-func (e *Updates) Init(props properties.Properties, env platform.Environment) {
+func (e *Updates) Init(props properties.Properties, env runtime.Environment) {
 	e.props = props
 	e.env = env
 }
