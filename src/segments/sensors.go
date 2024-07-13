@@ -252,7 +252,7 @@ func (e *Sensors) Enabled() bool {
 			}
 		}
 	}
-	e.FanIcon = e.props.GetString(FanIcon, "")
+	e.FanIcon = e.props.GetString(FanIcon, "󰈐")
 	e.TempIcon = e.props.GetString(TempIcon, "")
 	e.CelsiusIcon = e.props.GetString(CelsiusIcon, "")
 	if speed > 0 {
