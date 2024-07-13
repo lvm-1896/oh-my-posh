@@ -14,6 +14,7 @@ func (e *Engine) Tooltip(tip string) string {
 		shell.ZSH,
 		shell.CMD,
 		shell.FISH,
+		shell.YASH, // FIXME?
 		shell.PWSH,
 		shell.PWSH5,
 		shell.GENERIC,
