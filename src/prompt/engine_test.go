@@ -55,20 +55,28 @@ func TestPrintPWD(t *testing.T) {
 		Config   string
 		Pwd      string
 		Shell    string
+		Cygwin   bool
 		OSC99    bool
 	}{
 		{Case: "Empty PWD"},
 		{Case: "OSC99", Config: terminal.OSC99, Expected: "\x1b]9;9;pwd\x1b\\"},
+		{Case: "OSC99 - Elvish", Config: terminal.OSC99, Shell: shell.ELVISH},
 		{Case: "OSC7", Config: terminal.OSC7, Expected: "\x1b]7;file://host/pwd\x1b\\"},
 		{Case: "OSC51", Config: terminal.OSC51, Expected: "\x1b]51;Auser@host:pwd\x1b\\"},
 		{Case: "Deprecated OSC99", OSC99: true, Expected: "\x1b]9;9;pwd\x1b\\"},
 		{Case: "Template (empty)", Config: "{{ if eq .Shell \"pwsh\" }}osc7{{ end }}"},
 		{Case: "Template (non empty)", Config: "{{ if eq .Shell \"shell\" }}osc7{{ end }}", Expected: "\x1b]7;file://host/pwd\x1b\\"},
 		{
-			Case:     "OSC99 Bash",
+			Case:     "OSC99 Cygwin",
 			Pwd:      `C:\Users\user\Documents\GitHub\oh-my-posh`,
 			Config:   terminal.OSC99,
-			Shell:    shell.BASH,
+			Cygwin:   true,
+			Expected: "\x1b]9;9;C:/Users/user/Documents/GitHub/oh-my-posh\x1b\\",
+		},
+		{
+			Case:     "OSC99 Windows",
+			Pwd:      `C:\Users\user\Documents\GitHub\oh-my-posh`,
+			Config:   terminal.OSC99,
 			Expected: "\x1b]9;9;C:\\Users\\user\\Documents\\GitHub\\oh-my-posh\x1b\\",
 		},
 	}
@@ -78,15 +86,18 @@ func TestPrintPWD(t *testing.T) {
 		if len(tc.Pwd) == 0 {
 			tc.Pwd = "pwd"
 		}
+
 		env.On("Pwd").Return(tc.Pwd)
-		env.On("Shell").Return(tc.Shell)
 		env.On("User").Return("user")
+		env.On("Shell").Return(tc.Shell)
+		env.On("IsCygwin").Return(tc.Cygwin)
 		env.On("Host").Return("host", nil)
 		env.On("DebugF", testify_.Anything, testify_.Anything).Return(nil)
 		env.On("TemplateCache").Return(&cache.Template{
 			Env:   make(map[string]string),
 			Shell: "shell",
 		})
+		env.On("Flags").Return(&runtime.Flags{})
 
 		terminal.Init(shell.GENERIC)
 
@@ -119,7 +130,7 @@ func engineRender() {
 	cfg := config.Load(env)
 
 	terminal.Init(shell.GENERIC)
-	terminal.BackgroundColor = shell.ConsoleBackgroundColor(env, cfg.TerminalBackground)
+	terminal.BackgroundColor = cfg.TerminalBackground.ResolveTemplate(env)
 	terminal.Colors = cfg.MakeColors()
 
 	engine := &Engine{
@@ -177,6 +188,7 @@ func TestGetTitle(t *testing.T) {
 		env.On("Home").Return("/usr/home")
 		env.On("PathSeparator").Return(tc.PathSeparator)
 		env.On("DebugF", testify_.Anything, testify_.Anything).Return(nil)
+		env.On("Flags").Return(&runtime.Flags{})
 		env.On("TemplateCache").Return(&cache.Template{
 			Env: map[string]string{
 				"USERDOMAIN": "MyCompany",
@@ -240,6 +252,7 @@ func TestGetConsoleTitleIfGethostnameReturnsError(t *testing.T) {
 		env.On("Pwd").Return(tc.Cwd)
 		env.On("Home").Return("/usr/home")
 		env.On("DebugF", testify_.Anything, testify_.Anything).Return(nil)
+		env.On("Flags").Return(&runtime.Flags{})
 		env.On("TemplateCache").Return(&cache.Template{
 			Env: map[string]string{
 				"USERDOMAIN": "MyCompany",

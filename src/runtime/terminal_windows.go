@@ -87,6 +87,11 @@ func (term *Terminal) IsWsl2() bool {
 	return false
 }
 
+func (term *Terminal) IsCygwin() bool {
+	defer term.Trace(time.Now())
+	return len(term.Getenv("OSTYPE")) > 0
+}
+
 func (term *Terminal) TerminalWidth() (int, error) {
 	defer term.Trace(time.Now())
 
@@ -118,10 +123,12 @@ func (term *Terminal) Platform() string {
 
 func (term *Terminal) CachePath() string {
 	defer term.Trace(time.Now())
+
 	// get LOCALAPPDATA if present
 	if cachePath := returnOrBuildCachePath(term.Getenv("LOCALAPPDATA")); len(cachePath) != 0 {
 		return cachePath
 	}
+
 	return term.Home()
 }
 

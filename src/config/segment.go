@@ -112,10 +112,10 @@ func (segment *Segment) SetEnabled(env runtime.Environment) {
 		return
 	}
 
-	segment.env.DebugF("Segment: %s", segment.Name())
+	segment.env.DebugF("segment: %s", segment.Name())
 
 	// validate toggles
-	if toggles, OK := segment.env.Cache().Get(cache.TOGGLECACHE); OK && len(toggles) > 0 {
+	if toggles, OK := segment.env.Session().Get(cache.TOGGLECACHE); OK && len(toggles) > 0 {
 		list := strings.Split(toggles, ",")
 		for _, toggle := range list {
 			if SegmentType(toggle) == segment.Type || toggle == segment.Alias {

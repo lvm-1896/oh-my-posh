@@ -1,10 +1,8 @@
 package prompt
 
 import (
-	"encoding/json"
 	"strings"
 
-	"github.com/jandedobbeleer/oh-my-posh/src/cache"
 	"github.com/jandedobbeleer/oh-my-posh/src/color"
 	"github.com/jandedobbeleer/oh-my-posh/src/config"
 	"github.com/jandedobbeleer/oh-my-posh/src/regex"
@@ -15,13 +13,6 @@ import (
 )
 
 var cycle *color.Cycle = &color.Cycle{}
-
-type promptCache struct {
-	Prompt            string
-	CurrentLineLength int
-	RPrompt           string
-	RPromptLength     int
-}
 
 type Engine struct {
 	Config *config.Config
@@ -35,8 +26,6 @@ type Engine struct {
 
 	activeSegment         *config.Segment
 	previousActiveSegment *config.Segment
-
-	promptCache *promptCache
 }
 
 func (e *Engine) write(text string) {
@@ -80,21 +69,25 @@ func (e *Engine) canWriteRightBlock(length int, rprompt bool) (int, bool) {
 }
 
 func (e *Engine) pwd() {
-	// only print when supported
-	sh := e.Env.Shell()
-	if sh == shell.ELVISH || sh == shell.XONSH {
-		return
-	}
 	// only print when relevant
 	if len(e.Config.PWD) == 0 && !e.Config.OSC99 {
 		return
 	}
 
-	cwd := e.Env.Pwd()
+	// only print when supported
+	sh := e.Env.Shell()
+	if sh == shell.ELVISH || sh == shell.XONSH {
+		return
+	}
+
+	pwd := e.Env.Pwd()
+	if e.Env.IsCygwin() {
+		pwd = strings.ReplaceAll(pwd, `\`, `/`)
+	}
 
 	// Backwards compatibility for deprecated OSC99
 	if e.Config.OSC99 {
-		e.write(terminal.Pwd(terminal.OSC99, "", "", cwd))
+		e.write(terminal.Pwd(terminal.OSC99, "", "", pwd))
 		return
 	}
 
@@ -111,7 +104,7 @@ func (e *Engine) pwd() {
 
 	user := e.Env.User()
 	host, _ := e.Env.Host()
-	e.write(terminal.Pwd(pwdType, user, host, cwd))
+	e.write(terminal.Pwd(pwdType, user, host, pwd))
 }
 
 func (e *Engine) getNewline() string {
@@ -510,34 +503,6 @@ func (e *Engine) adjustTrailingDiamondColorOverrides() {
 	}
 }
 
-func (e *Engine) checkPromptCache() bool {
-	data, ok := e.Env.Cache().Get(cache.PROMPTCACHE)
-	if !ok {
-		return false
-	}
-
-	e.promptCache = &promptCache{}
-	err := json.Unmarshal([]byte(data), e.promptCache)
-	if err != nil {
-		return false
-	}
-
-	e.write(e.promptCache.Prompt)
-	e.currentLineLength = e.promptCache.CurrentLineLength
-	e.rprompt = e.promptCache.RPrompt
-	e.rpromptLength = e.promptCache.RPromptLength
-
-	return true
-}
-
-func (e *Engine) updatePromptCache(value *promptCache) {
-	cacheJSON, err := json.Marshal(value)
-	if err != nil {
-		return
-	}
-	e.Env.Cache().Set(cache.PROMPTCACHE, string(cacheJSON), 1440)
-}
-
 // New returns a prompt engine initialized with the
 // given configuration options, and is ready to print any
 // of the prompt components.
@@ -557,7 +522,7 @@ func New(flags *runtime.Flags) *Engine {
 	flags.HasTransient = cfg.TransientPrompt != nil
 
 	terminal.Init(env.Shell())
-	terminal.BackgroundColor = shell.ConsoleBackgroundColor(env, cfg.TerminalBackground)
+	terminal.BackgroundColor = cfg.TerminalBackground.ResolveTemplate(env)
 	terminal.Colors = cfg.MakeColors()
 	terminal.Plain = flags.Plain
 

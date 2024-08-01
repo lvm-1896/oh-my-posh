@@ -6,13 +6,19 @@ export CONDA_PROMPT_MODIFIER=false
 export POSH_PROMPT_COUNT=0
 export ZLE_RPROMPT_INDENT=0
 
+_omp_executable=::OMP::
+
+# switches to enable/disable features
+_omp_cursor_positioning=0
+_omp_ftcs_marks=0
+
 # set secondary prompt
-PS2="$(::OMP:: print secondary --config="$POSH_THEME" --shell=zsh)"
+PS2="$($_omp_executable print secondary --shell=zsh)"
 
 function _omp_set_cursor_position() {
   # not supported in Midnight Commander
   # see https://github.com/JanDeDobbeleer/oh-my-posh/issues/3415
-  if [[ "::CURSOR::" != "true" ]] || [[ -v MC_SID ]]; then
+  if [[ $_omp_cursor_positioning == 0 ]] || [[ -v MC_SID ]]; then
     return
   fi
 
@@ -37,11 +43,11 @@ function set_poshcontext() {
 }
 
 function _omp_preexec() {
-  if [[ "::FTCS_MARKS::" = "true" ]]; then
+  if [[ $_omp_ftcs_marks == 0 ]]; then
     printf "\033]133;C\007"
   fi
 
-  _omp_start_time=$(::OMP:: get millis)
+  _omp_start_time=$($_omp_executable get millis)
 }
 
 function _omp_precmd() {
@@ -52,12 +58,12 @@ function _omp_precmd() {
   _omp_no_exit_code="true"
 
   if [ $_omp_start_time ]; then
-    local omp_now=$(::OMP:: get millis --shell=zsh)
+    local omp_now=$($_omp_executable get millis --shell=zsh)
     _omp_elapsed=$(($omp_now - $_omp_start_time))
     _omp_no_exit_code="false"
   fi
 
-  if [[ "${_omp_pipestatus_cache[-1]}" != "$_omp_status_cache" ]]; then
+  if [[ ${_omp_pipestatus_cache[-1]} != "$_omp_status_cache" ]]; then
     _omp_pipestatus_cache=("$_omp_status_cache")
   fi
 
@@ -67,7 +73,7 @@ function _omp_precmd() {
   set_poshcontext
   _omp_set_cursor_position
 
-  eval "$(::OMP:: print primary --config="$POSH_THEME" --status="$_omp_status_cache" --pipestatus="${_omp_pipestatus_cache[*]}" --execution-time="$_omp_elapsed" --stack-count="$_omp_stack_count" --eval --shell=zsh --shell-version="$ZSH_VERSION" --no-status="$_omp_no_exit_code")"
+  eval "$($_omp_executable print primary --status="$_omp_status_cache" --pipestatus="${_omp_pipestatus_cache[*]}" --execution-time="$_omp_elapsed" --stack-count="$_omp_stack_count" --eval --shell=zsh --shell-version="$ZSH_VERSION" --no-status="$_omp_no_exit_code")"
   unset _omp_start_time
 }
 
@@ -84,10 +90,10 @@ function _omp_cleanup() {
   )
   local widget
   for widget in "${omp_widgets[@]}"; do
-    if [[ "${widgets[_omp_original::$widget]}" ]]; then
+    if [[ ${widgets[._omp_original::$widget]} ]]; then
       # Restore the original widget.
-      zle -A _omp_original::$widget $widget
-    elif [[ "${widgets[$widget]}" = user:_omp_* ]]; then
+      zle -A ._omp_original::$widget $widget
+    elif [[ ${widgets[$widget]} = user:_omp_* ]]; then
       # Delete the OMP-defined widget.
       zle -D $widget
     fi
@@ -97,7 +103,7 @@ _omp_cleanup
 unset -f _omp_cleanup
 
 function _omp_render_tooltip() {
-  if [[ "$KEYS" != ' ' ]]; then
+  if [[ $KEYS != ' ' ]]; then
     return
   fi
 
@@ -105,13 +111,13 @@ function _omp_render_tooltip() {
   local tooltip_command=${${(MS)BUFFER##[[:graph:]]*}%%[[:space:]]*}
 
   # Ignore an empty/repeated tooltip command.
-  if [[ -z "$tooltip_command" ]] || [[ "$tooltip_command" = "$_omp_tooltip_command" ]]; then
+  if [[ -z $tooltip_command ]] || [[ $tooltip_command = "$_omp_tooltip_command" ]]; then
     return
   fi
 
   _omp_tooltip_command="$tooltip_command"
-  local tooltip=$(::OMP:: print tooltip --config="$POSH_THEME" --status="$_omp_status_cache" --pipestatus="${_omp_pipestatus_cache[*]}" --execution-time="$_omp_elapsed" --stack-count="$_omp_stack_count" --command="$tooltip_command" --shell=zsh --shell-version="$ZSH_VERSION" --no-status="$_omp_no_exit_code")
-  if [[ -z "$tooltip" ]]; then
+  local tooltip=$($_omp_executable print tooltip --status="$_omp_status_cache" --pipestatus="${_omp_pipestatus_cache[*]}" --execution-time="$_omp_elapsed" --stack-count="$_omp_stack_count" --command="$tooltip_command" --shell=zsh --shell-version="$ZSH_VERSION" --no-status="$_omp_no_exit_code")
+  if [[ -z $tooltip ]]; then
     return
   fi
 
@@ -129,7 +135,7 @@ function _omp_zle-line-init() {
   (( $+zle_bracketed_paste )) && print -r -n - $zle_bracketed_paste[2]
 
   _omp_tooltip_command=''
-  eval "$(::OMP:: print transient --config="$POSH_THEME" --status="$_omp_status_cache" --pipestatus="${_omp_pipestatus_cache[*]}" --execution-time="$_omp_elapsed" --stack-count="$_omp_stack_count" --eval --shell=zsh --shell-version="$ZSH_VERSION" --no-status="$_omp_no_exit_code")"
+  eval "$($_omp_executable print transient --status="$_omp_status_cache" --pipestatus="${_omp_pipestatus_cache[*]}" --execution-time="$_omp_elapsed" --stack-count="$_omp_stack_count" --eval --shell=zsh --shell-version="$ZSH_VERSION" --no-status="$_omp_no_exit_code")"
   zle .reset-prompt
 
   # Exit the shell if we receive EOT.
@@ -176,30 +182,23 @@ function _omp_create_widget() {
 
   # User-defined or builtin: backup and decorate it.
   *)
-    # Back up the original widget.
-    zle -A $widget _omp_original::$widget
-    eval "_omp_decorated_${(q)widget}() { _omp_call_widget ${(q)omp_func} _omp_original::${(q)widget} -- \"\$@\" }"
+    # Back up the original widget. The leading dot in widget name is to work around bugs when used with zsh-syntax-highlighting in Zsh v5.8 or lower.
+    zle -A $widget ._omp_original::$widget
+    eval "_omp_decorated_${(q)widget}() { _omp_call_widget ${(q)omp_func} ._omp_original::${(q)widget} -- \"\$@\" }"
     zle -N $widget _omp_decorated_$widget
     ;;
   esac
 }
 
+function enable_poshtooltips() {
+  local widget=${$(bindkey " "):2}
+
+  if [[ -z $widget ]]; then
+    widget=self-insert
+  fi
+
+  _omp_create_widget $widget _omp_render_tooltip
+}
+
 # legacy functions
-function enable_poshtooltips() {}
 function enable_poshtransientprompt() {}
-
-if [[ "::TOOLTIPS::" = "true" ]]; then
-  _omp_create_widget self-insert _omp_render_tooltip
-fi
-
-if [[ "::TRANSIENT::" = "true" ]]; then
-  _omp_create_widget zle-line-init _omp_zle-line-init
-fi
-
-if [[ "::UPGRADE::" = "true" ]]; then
-  echo "::UPGRADENOTICE::"
-fi
-
-if [[ "::AUTOUPGRADE::" = "true" ]]; then
-  ::OMP:: upgrade
-fi

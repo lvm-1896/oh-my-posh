@@ -39,8 +39,8 @@ end
 
 local endedit_time = 0
 local last_duration = 0
-local tooltips_enabled = ::TOOLTIPS::
-local rprompt_enabled = ::RPROMPT::
+local rprompt_enabled = false
+local transient_enabled = false
 local no_exit_code = true
 
 local cached_prompt = {}
@@ -72,10 +72,6 @@ end
 
 local function omp_exe()
     return '"'..::OMP::..'"'
-end
-
-local function omp_config()
-    return '"'..::CONFIG::..'"'
 end
 
 os.setenv("POSH_THEME", ::CONFIG::)
@@ -162,7 +158,7 @@ local function get_posh_prompt(rprompt)
     if rprompt then
         prompt = "right"
     end
-    local prompt_exe = string.format('%s print %s --shell=cmd --config=%s %s %s %s', omp_exe(), prompt, omp_config(), execution_time_option(), error_level_option(), no_exit_code_option())
+    local prompt_exe = string.format('%s print %s --shell=cmd %s %s %s', omp_exe(), prompt, execution_time_option(), error_level_option(), no_exit_code_option())
     return run_posh_command(prompt_exe)
 end
 
@@ -171,7 +167,7 @@ local function set_posh_tooltip(tip_command)
         -- Escape special characters properly, if any.
         local escaped_tip_command = string.gsub(tip_command, '(\\+)"', '%1%1"'):gsub('(\\+)$', '%1%1'):gsub('"', '\\"'):gsub('([&<>%(%)@%^|])', '^%1')
 
-        local prompt_exe = string.format('%s print tooltip --shell=cmd %s --config=%s --command="%s"', omp_exe(), error_level_option(), omp_config(), escaped_tip_command)
+        local prompt_exe = string.format('%s print tooltip --shell=cmd %s --command="%s"', omp_exe(), error_level_option(), escaped_tip_command)
         local tooltip = run_posh_command(prompt_exe)
         -- Do not cache an empty tooltip.
         if tooltip == "" then
@@ -260,20 +256,29 @@ function p:filter(prompt)
 
     return cached_prompt.left
 end
+
 function p:rightfilter(prompt)
     -- Return cached tooltip if available, otherwise return cached rprompt.
     -- Returning false as the second return value halts further prompt
     -- filtering, to keep other things from overriding what we generated.
     return (cached_prompt.tooltip or cached_prompt.right), false
 end
+
 function p:transientfilter(prompt)
-    local prompt_exe = string.format('%s print transient --shell=cmd --config=%s %s %s', omp_exe(), omp_config(), error_level_option(), no_exit_code_option())
+    if not transient_enabled then
+        return nil
+    end
+
+    local prompt_exe = string.format('%s print transient --shell=cmd %s %s', omp_exe(), error_level_option(), no_exit_code_option())
     prompt = run_posh_command(prompt_exe)
+
     if prompt == "" then
         prompt = nil
     end
+
     return prompt
 end
+
 function p:transientrightfilter(prompt)
     return "", false
 end
@@ -323,11 +328,10 @@ function ohmyposh_space(rl_buffer)
     end
 end
 
-if tooltips_enabled and rl.setbinding then
-    rl.setbinding(' ', [["luafunc:ohmyposh_space"]], 'emacs')
-end
+local function enable_tooltips()
+    if not rl.setbinding then
+        return
+    end
 
-if '::AUTOUPGRADE::' == 'true' then
-    local prompt_exe = string.format('%s upgrade', omp_exe())
-    os.execute(prompt_exe)
+    rl.setbinding(' ', [["luafunc:ohmyposh_space"]], 'emacs')
 end

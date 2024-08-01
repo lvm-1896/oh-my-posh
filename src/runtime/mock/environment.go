@@ -172,6 +172,11 @@ func (env *Environment) IsWsl2() bool {
 	return args.Bool(0)
 }
 
+func (env *Environment) IsCygwin() bool {
+	args := env.Called()
+	return args.Bool(0)
+}
+
 func (env *Environment) TerminalWidth() (int, error) {
 	args := env.Called()
 	return args.Int(0), args.Error(1)
@@ -183,6 +188,11 @@ func (env *Environment) CachePath() string {
 }
 
 func (env *Environment) Cache() cache.Cache {
+	args := env.Called()
+	return args.Get(0).(cache.Cache)
+}
+
+func (env *Environment) Session() cache.Cache {
 	args := env.Called()
 	return args.Get(0).(cache.Cache)
 }

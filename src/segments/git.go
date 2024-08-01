@@ -111,6 +111,8 @@ const (
 	UntrackedModes properties.Property = "untracked_modes"
 	// IgnoreSubmodules list the optional ignore-submodules mode per repo
 	IgnoreSubmodules properties.Property = "ignore_submodules"
+	// MappedBranches allows overriding certain branches with an icon/text
+	MappedBranches properties.Property = "mapped_branches"
 
 	DETACHED     = "(detached)"
 	BRANCHPREFIX = "ref: refs/heads/"
@@ -179,7 +181,8 @@ func (g *Git) Enabled() bool {
 		return true
 	}
 
-	if g.hasPoshGitStatus() {
+	source := g.props.GetString(Source, Cli)
+	if source == Pwsh && g.hasPoshGitStatus() {
 		return true
 	}
 
@@ -279,12 +282,7 @@ func (g *Git) shouldDisplay() bool {
 		return false
 	}
 
-	gitdir, err := g.env.HasParentFilePath(".git", true)
-	if err != nil {
-		if !g.props.GetBool(FetchBareInfo, false) {
-			return false
-		}
-
+	if g.props.GetBool(FetchBareInfo, false) {
 		g.realDir = g.env.Pwd()
 		bare := g.getGitCommandOutput("rev-parse", "--is-bare-repository")
 		if bare == trueStr {
@@ -292,7 +290,10 @@ func (g *Git) shouldDisplay() bool {
 			g.workingDir = g.realDir
 			return true
 		}
+	}
 
+	gitdir, err := g.env.HasParentFilePath(".git", true)
+	if err != nil {
 		return false
 	}
 
@@ -324,13 +325,21 @@ func (g *Git) setUser() {
 }
 
 func (g *Git) getBareRepoInfo() {
+	// we can still have a pointer to a bare repo
+	if file, err := g.env.HasParentFilePath(".git", true); err == nil && !file.IsDir {
+		content := g.FileContents(file.ParentFolder, ".git")
+		path := strings.TrimPrefix(content, "gitdir: ")
+		g.workingDir = filepath.Join(file.ParentFolder, path)
+	}
+
 	head := g.FileContents(g.workingDir, "HEAD")
 	branchIcon := g.props.GetString(BranchIcon, "\uE0A0")
 	g.Ref = strings.Replace(head, "ref: refs/heads/", "", 1)
-	g.HEAD = fmt.Sprintf("%s%s", branchIcon, g.Ref)
+	g.HEAD = fmt.Sprintf("%s%s", branchIcon, g.formatBranch(g.Ref))
 	if !g.props.GetBool(FetchUpstreamIcon, false) {
 		return
 	}
+
 	g.Upstream = g.getGitCommandOutput("remote")
 	if len(g.Upstream) != 0 {
 		g.UpstreamIcon = g.getUpstreamIcon()
@@ -343,6 +352,7 @@ func (g *Git) setDir(dir string) {
 		g.Dir = strings.TrimSuffix(dir, `\.git`)
 		return
 	}
+
 	g.Dir = strings.TrimSuffix(dir, "/.git")
 }
 
@@ -352,8 +362,8 @@ func (g *Git) hasWorktree(gitdir *runtime.FileInfo) bool {
 	content = strings.Trim(content, " \r\n")
 	matches := regex.FindNamedRegexMatch(`^gitdir: (?P<dir>.*)$`, content)
 
-	if matches == nil || len(matches["dir"]) == 0 {
-		g.env.Debug("No matches found, directory isn't a worktree")
+	if len(matches) == 0 {
+		g.env.Debug("no matches found, directory isn't a worktree")
 		return false
 	}
 
@@ -361,22 +371,25 @@ func (g *Git) hasWorktree(gitdir *runtime.FileInfo) bool {
 	// to the mounted path
 	g.workingDir = g.convertToLinuxPath(matches["dir"])
 
+	// if we don't do this, we will identify the submodule as a worktree
+	isSubmodule := strings.Contains(g.workingDir, "/modules/")
+
 	// in worktrees, the path looks like this: gitdir: path/.git/worktrees/branch
-	// strips the last .git/worktrees part
-	// :ind+5 = index + /.git
-	ind := strings.LastIndex(g.workingDir, ".git/worktrees")
-	if ind > -1 {
+	// rootDir needs to become path/.git
+	// realDir needs to become path
+	ind := strings.LastIndex(g.workingDir, "/worktrees/")
+	if ind > -1 && !isSubmodule {
 		gitDir := filepath.Join(g.workingDir, "gitdir")
-		g.rootDir = g.workingDir[:ind+4]
-		g.realDir = strings.TrimSuffix(g.env.FileContent(gitDir), ".git\n")
+		g.rootDir = g.workingDir[:ind]
+		gitDirContent := g.env.FileContent(gitDir)
+		g.realDir = strings.TrimSuffix(gitDirContent, ".git\n")
 		g.IsWorkTree = true
 		return true
 	}
 
 	// in submodules, the path looks like this: gitdir: ../.git/modules/test-submodule
 	// we need the parent folder to detect where the real .git folder is
-	ind = strings.LastIndex(g.workingDir, ".git/modules")
-	if ind > -1 {
+	if isSubmodule {
 		g.rootDir = resolveGitPath(gitdir.ParentFolder, g.workingDir)
 		// this might be both a worktree and a submodule, where the path would look like
 		// this: path/.git/modules/module/path/worktrees/location. We cannot distinguish
@@ -391,6 +404,7 @@ func (g *Git) hasWorktree(gitdir *runtime.FileInfo) bool {
 			g.IsWorkTree = true
 			return true
 		}
+
 		g.realDir = g.rootDir
 		g.workingDir = g.rootDir
 		return true
@@ -538,23 +552,28 @@ func (g *Git) setGitStatus() {
 		g.Working.add(workingCode)
 		g.Staging.add(stagingCode)
 	}
+
 	const (
 		HASH         = "# branch.oid "
 		REF          = "# branch.head "
 		UPSTREAM     = "# branch.upstream "
 		BRANCHSTATUS = "# branch.ab "
 	)
+
 	// firstly assume that upstream is gone
 	g.UpstreamGone = true
 	statusFormats := g.props.GetKeyValueMap(StatusFormats, map[string]string{})
+
 	g.Working = &GitStatus{ScmStatus: ScmStatus{Formats: statusFormats}}
 	g.Staging = &GitStatus{ScmStatus: ScmStatus{Formats: statusFormats}}
+
 	untrackedMode := g.getUntrackedFilesMode()
 	args := []string{"status", untrackedMode, "--branch", "--porcelain=2"}
 	ignoreSubmodulesMode := g.getIgnoreSubmodulesMode()
 	if len(ignoreSubmodulesMode) > 0 {
 		args = append(args, ignoreSubmodulesMode)
 	}
+
 	output := g.getGitCommandOutput(args...)
 	for _, line := range strings.Split(output, "\n") {
 		if strings.HasPrefix(line, HASH) && len(line) >= len(HASH)+7 {
@@ -562,16 +581,19 @@ func (g *Git) setGitStatus() {
 			g.Hash = line[len(HASH):]
 			continue
 		}
+
 		if strings.HasPrefix(line, REF) && len(line) > len(REF) {
 			g.Ref = line[len(REF):]
 			continue
 		}
+
 		if strings.HasPrefix(line, UPSTREAM) && len(line) > len(UPSTREAM) {
 			// status reports upstream, but upstream may be gone (must check BRANCHSTATUS)
 			g.Upstream = line[len(UPSTREAM):]
 			g.UpstreamGone = true
 			continue
 		}
+
 		if strings.HasPrefix(line, BRANCHSTATUS) && len(line) > len(BRANCHSTATUS) {
 			status := line[len(BRANCHSTATUS):]
 			splitted := strings.Split(status, " ")
@@ -584,6 +606,7 @@ func (g *Git) setGitStatus() {
 			g.UpstreamGone = false
 			continue
 		}
+
 		addToStatus(line)
 	}
 }
@@ -603,7 +626,7 @@ func (g *Git) setGitHEADContext() {
 		g.Detached = true
 		g.setPrettyHEADName()
 	} else {
-		head := g.formatHEAD(g.Ref)
+		head := g.formatBranch(g.Ref)
 		g.HEAD = fmt.Sprintf("%s%s", branchIcon, head)
 	}
 
@@ -621,7 +644,7 @@ func (g *Git) setGitHEADContext() {
 			origin = formatDetached()
 		} else {
 			head = strings.Replace(head, "refs/heads/", "", 1)
-			origin = branchIcon + g.formatHEAD(head)
+			origin = branchIcon + g.formatBranch(head)
 		}
 		return origin
 	}
@@ -630,7 +653,7 @@ func (g *Git) setGitHEADContext() {
 		g.Rebase = true
 		origin := getPrettyNameOrigin("rebase-merge/head-name")
 		onto := g.getGitRefFileSymbolicName("rebase-merge/onto")
-		onto = g.formatHEAD(onto)
+		onto = g.formatBranch(onto)
 		step := g.FileContents(g.workingDir, "rebase-merge/msgnum")
 		total := g.FileContents(g.workingDir, "rebase-merge/end")
 		icon := g.props.GetString(RebaseIcon, "\uE728 ")
@@ -668,7 +691,7 @@ func (g *Git) setGitHEADContext() {
 				theirs = g.formatSHA(matches["theirs"])
 			default:
 				headIcon = branchIcon
-				theirs = g.formatHEAD(matches["theirs"])
+				theirs = g.formatBranch(matches["theirs"])
 			}
 			g.HEAD = fmt.Sprintf("%s%s%s into %s", icon, headIcon, theirs, formatDetached())
 			return
@@ -720,15 +743,6 @@ func (g *Git) setGitHEADContext() {
 	g.HEAD = formatDetached()
 }
 
-func (g *Git) formatHEAD(head string) string {
-	maxLength := g.props.GetInt(BranchMaxLength, 0)
-	if maxLength == 0 || len(head) < maxLength {
-		return head
-	}
-	symbol := g.props.GetString(TruncateSymbol, "")
-	return head[0:maxLength] + symbol
-}
-
 func (g *Git) formatSHA(sha string) string {
 	if len(sha) <= 7 {
 		return sha
@@ -753,7 +767,7 @@ func (g *Git) setPrettyHEADName() {
 		if strings.HasPrefix(HEADRef, BRANCHPREFIX) {
 			branchName := strings.TrimPrefix(HEADRef, BRANCHPREFIX)
 			g.Ref = branchName
-			g.HEAD = fmt.Sprintf("%s%s", g.props.GetString(BranchIcon, "\uE0A0"), g.formatHEAD(branchName))
+			g.HEAD = fmt.Sprintf("%s%s", g.props.GetString(BranchIcon, "\uE0A0"), g.formatBranch(branchName))
 			return
 		}
 		// no branch, points to commit

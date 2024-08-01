@@ -4,17 +4,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/jandedobbeleer/oh-my-posh/src/color"
 	"github.com/jandedobbeleer/oh-my-posh/src/log"
 	"github.com/jandedobbeleer/oh-my-posh/src/regex"
 	"github.com/jandedobbeleer/oh-my-posh/src/shell"
-	"github.com/mattn/go-runewidth"
 )
-
-func init() {
-	runewidth.DefaultCondition.EastAsianWidth = false
-}
 
 type style struct {
 	AnchorStart string
@@ -102,8 +98,8 @@ func Init(sh string) {
 	Shell = sh
 	Program = getTerminalName()
 
-	log.Debug("Terminal shell: %s", Shell)
-	log.Debug("Terminal program: %s", Program)
+	log.Debug("terminal program:", Program)
+	log.Debug("terminal shell:", Shell)
 
 	color.TrueColor = Program != AppleTerminal
 
@@ -163,7 +159,7 @@ func Pwd(pwdType, userName, hostName, pwd string) string {
 	}
 
 	if strings.HasSuffix(pwd, ":") {
-		pwd += "\\"
+		pwd += `/`
 	}
 
 	switch pwdType {
@@ -400,7 +396,7 @@ func write(s rune) {
 		}
 	}
 
-	length += runewidth.RuneWidth(s)
+	length += utf8.RuneCountInString(string(s))
 	lastRune = s
 	builder.WriteRune(s)
 }

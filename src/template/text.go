@@ -18,6 +18,9 @@ const (
 	IncorrectTemplate = "unable to create text based on template"
 
 	globalRef = ".$"
+
+	elvish = "elvish"
+	xonsh  = "xonsh"
 )
 
 var (
@@ -40,7 +43,10 @@ var (
 		"Templates",
 		"Var",
 		"Data",
+		"Jobs",
 	}
+
+	shell string
 )
 
 type Text struct {
@@ -70,7 +76,9 @@ func (c *Context) init(t *Text) {
 }
 
 func (t *Text) Render() (string, error) {
-	t.Env.DebugF("Rendering template: %s", t.Template)
+	t.Env.DebugF("rendering template: %s", t.Template)
+
+	shell = t.Env.Flags().Shell
 
 	if !strings.Contains(t.Template, "{{") || !strings.Contains(t.Template, "}}") {
 		return t.Template, nil

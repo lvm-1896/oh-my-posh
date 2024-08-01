@@ -54,7 +54,7 @@ const (
 	NBAScoreURL    string = "https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json"
 	NBAScheduleURL string = "https://stats.nba.com/stats/internationalbroadcasterschedule?LeagueID=00&Season=%s&Date=%s&RegionID=1&EST=Y"
 
-	Unknown = "Unknown"
+	UNKNOWN = "unknown"
 
 	currentNBASeason = "2023"
 	NBADateFormat    = "02/01/2006"
@@ -92,7 +92,7 @@ func (gs GameStatus) String() string {
 	case NotFound:
 		return "Not Found"
 	default:
-		return Unknown
+		return UNKNOWN
 	}
 }
 
@@ -368,7 +368,7 @@ func (nba *Nba) getResult() (*NBAData, error) {
 	// Cache the fact a game was not found for 30 minutes so we don't call the API too often
 	cacheNotFoundTimeout := nba.props.GetInt(properties.CacheTimeout, 30)
 
-	nba.env.Debug("Validating cache data for " + teamName)
+	nba.env.Debug("validating cache data for " + teamName)
 
 	if cacheScheduleTimeout > 0 {
 		if data, err := nba.getCachedScheduleValue(cachedScheduleKey); err == nil {
@@ -382,7 +382,7 @@ func (nba *Nba) getResult() (*NBAData, error) {
 		}
 	}
 
-	nba.env.Debug("Fetching available data for " + teamName)
+	nba.env.Debug("fetching available data for " + teamName)
 
 	data, err := nba.getAvailableGameData(teamName, httpTimeout)
 	if err != nil {

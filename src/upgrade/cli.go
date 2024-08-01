@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -57,7 +58,7 @@ func (m *model) Init() tea.Cmd {
 		go func() {
 			if err := install(m.tag); err != nil {
 				m.error = err
-				program.Quit()
+				program.Send(resultMsg(fmt.Sprintf("❌ upgrade failed: %v", err)))
 				return
 			}
 
@@ -131,11 +132,7 @@ func Run(latest string) error {
 	title = titleStyle.Render(title)
 
 	program = tea.NewProgram(initialModel(latest))
-	resultModel, err := program.Run()
-
-	if err != nil {
-		return err
-	}
+	resultModel, _ := program.Run()
 
 	programModel, OK := resultModel.(*model)
 	if !OK {
@@ -143,4 +140,16 @@ func Run(latest string) error {
 	}
 
 	return programModel.error
+}
+
+func IsMajorUpgrade(current, latest string) bool {
+	if len(current) == 0 {
+		return false
+	}
+
+	getMajorNumber := func(version string) string {
+		return strings.Split(version, ".")[0]
+	}
+
+	return getMajorNumber(current) != getMajorNumber(latest)
 }
